@@ -29,8 +29,7 @@ namespace VaultsII.MediaStorage {
 
             string[] filePaths = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
             foreach (string filePath in filePaths) {
-                
-
+               
                 storage.Everything.AddMedia(filePath);
             }
 

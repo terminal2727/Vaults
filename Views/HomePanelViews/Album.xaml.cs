@@ -86,24 +86,38 @@ namespace VaultsII.Views.HomePanelViews {
         }
 
         public void PopulateMosaic() {
-            Mosaic constructed = new();
+            List<StackPanel> segments = new();
 
             if (layoutDirection == LayoutDirection.Horizontal) {
-                constructed = MosaicConstructor.ConstructHorizontalMosaic(storage.Current, maximumAspectLength, totalItemSpace);
+                segments = MosaicConstructor.ConstructHorizontalMosaic(storage.Current, maximumAspectLength, totalItemSpace);
             } else { 
-                constructed = MosaicConstructor.ConstructVerticalMosaic(); 
+                //constructed = MosaicConstructor.ConstructVerticalMosaic(); 
             }
 
-            Body.ItemsSource = constructed.segments;
+            Body.ItemsSource = segments;
 
-            foreach (var segment in constructed.segments) {
+            foreach (var segment in segments) {
                 foreach (var item in segment.Children) {
                     if (item is Image image) {
                         image.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);
                     } else if (item is MediaElement video) {
                         video.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);
+                        video.MouseEnter += (o, e) => PeekVideo(o, e, true);
+                        video.MouseLeave += (o, e) => PeekVideo(o, e, false);
                     }
                 }
+            }
+        }
+
+        private void PeekVideo(object o, MouseEventArgs e, bool v) {
+            MediaElement video = (MediaElement)o;
+
+            video.LoadedBehavior = MediaState.Manual;
+
+            if (v) {
+                video.Play();  
+            } else {
+                video.Stop();
             }
         }
 
@@ -137,8 +151,11 @@ namespace VaultsII.Views.HomePanelViews {
                     Source = elementSource.Source,
                     Margin = new Thickness(53),
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    LoadedBehavior = MediaState.Pause
                 };
+
+                Overlay.Children.Add(video);
             }
         }
 

@@ -12,7 +12,7 @@ using FFMpegCore;
 namespace VaultsII.Display {
     public static class MosaicConstructor {
 
-        public static Mosaic ConstructHorizontalMosaic(AlbumData data, double maximumAspectLength, double totalItemSpace) {
+        public static List<StackPanel> ConstructHorizontalMosaic(AlbumData data, double maximumAspectLength, double totalItemSpace) {
             data.SortMedia();
 
             List<StackPanel> segments = new();
@@ -93,10 +93,62 @@ namespace VaultsII.Display {
                 } else if (container is VideoContainer v_container) {
                     var dimensions = GetVideoDimensions(v_container.FilePath);
 
+                    double scaledHeight = maximumAspectLength;
+                    double scaledWidth = maximumAspectLength * ((double)dimensions.width / (double)dimensions.height);
+
+                    if (scaledWidth > totalItemSpace) {
+                        scaledWidth = totalItemSpace;
+                        scaledHeight = scaledWidth * (dimensions.width / dimensions.height);
+                    }
+
+                    AspectRatio ratio = new(scaledWidth, scaledHeight);
+                    Uri path = new(v_container.FilePath, UriKind.RelativeOrAbsolute);
+
+                    MediaElement video = new() { 
+                        Source = path,
+                        Height = scaledHeight,
+                        Width = scaledWidth,
+                        LoadedBehavior = MediaState.Stop
+                    };
+
+                    // Determines if the image can fit into any spaces
+                    bool skip = false;
+
+                    for (int i = 0; i < spaces.Count; i++) {
+                        if (ratio.Width > spaces[i].Space) { continue; }
+
+                        segments[spaces[i].Index].Children.Add(video);
+                        spaces[i] = new(spaces[i].Index, spaces[i].Space - ratio.Width);
+
+                        skip = true;
+                        break;
+                    }
+
+                    if (skip) { continue; }
+
+                    // Determines if the line's gotten too long
+                    if (currentSegmentsLength + ratio.Width > totalItemSpace) {
+                        spaces.Add(new(currentSegmentIndex, totalItemSpace - currentSegmentsLength));
+
+                        StackPanel panel = new() { Orientation = Orientation.Horizontal };
+
+                        panel.Children.Add(video);
+                        segments.Add(panel);
+
+                        currentSegmentsLength = ratio.Width;
+
+                        currentSegmentIndex++;
+                        continue;
+                    }
+
+                    // Else, adds the line to the current segment
+                    currentSegmentsLength += ratio.Width;
+
+                    segments[currentSegmentIndex].Children.Add(video);
                 }
             }
 
-            return new Mosaic(segments);
+            return segments;
         }
 
         public static Mosaic ConstructVerticalMosaic() {
@@ -115,16 +167,6 @@ namespace VaultsII.Display {
             }
 
             return (-1, -1);
-        }
-
-        private static void PlayVideo(object o, MouseEventArgs e) {
-            MediaElement video = (MediaElement)o;
-            video.Play();
-        }
-
-        private static void StopVideo(object o, MouseEventArgs e) {
-            MediaElement video = (MediaElement)o;
-            video.Stop();
         }
 
         private static AspectRatio GetAspectRatio(ImageSource source, double maximumAspectLength, double totalItemSpace) {
