@@ -1,0 +1,41 @@
+﻿<Window x:Class="VaultsII.Views.Modals.RemoveMonitoredFoldersModal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VaultsII.Views.Modals"
+        mc:Ignorable="d"
+        Title="RemoveMonitoredFoldersModal" 
+        Height="450" 
+        Width="800">
+    <Grid Background="#353943">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0"
+                x:Name="Cancel"
+                Content="Cancel"
+                Click="Cancel_Click"
+                HorizontalAlignment="Left"
+                Width="75"
+                Margin="5, 5, 5, 5"
+                Style="{StaticResource ForegroundButtons}"/>
+
+        <Button Grid.Row="0"
+                x:Name="Remove"
+                Content="Remove"
+                Click="Remove_Click"
+                HorizontalAlignment="Right"
+                Width="75"
+                Margin="5, 5, 5, 5"
+                Style="{StaticResource ForegroundButtons}"/>
+
+        <ListView Grid.Row="1"
+                  x:Name="MonitoredFoldersList"
+                  Foreground="#d2dfff"
+                  Background="Transparent"/>
+
+    </Grid>
+</Window>

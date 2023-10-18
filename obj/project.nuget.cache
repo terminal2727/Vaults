@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "hKTVNHj7ddwvgzYgmHO+MqHXjt8/HzGrD03i+fDTyAxb875FKT23YV2JvJrFH7lwDffN8wkGYfZuV3biTEVNGg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\commi\\source\\repos\\VaultsII\\VaultsII\\VaultsII.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\commi\\.nuget\\packages\\ffmpegcore\\5.1.0\\ffmpegcore.5.1.0.nupkg.sha512",
+    "C:\\Users\\commi\\.nuget\\packages\\instances\\3.0.0\\instances.3.0.0.nupkg.sha512",
+    "C:\\Users\\commi\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "C:\\Users\\commi\\.nuget\\packages\\system.text.encodings.web\\7.0.0\\system.text.encodings.web.7.0.0.nupkg.sha512",
+    "C:\\Users\\commi\\.nuget\\packages\\system.text.json\\7.0.2\\system.text.json.7.0.2.nupkg.sha512",
+    "C:\\Users\\commi\\.nuget\\packages\\wpfanimatedgif\\2.0.2\\wpfanimatedgif.2.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

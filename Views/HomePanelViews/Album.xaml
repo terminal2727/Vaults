@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="VaultsII.Views.HomePanelViews.Album"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VaultsII.Views.HomePanelViews"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid x:Name="Overlay" 
+              Visibility="Hidden"
+              Panel.ZIndex="1">
+            
+            <Rectangle x:Name="RectangleOverlay"
+                       Fill="Black"
+                       Opacity="0.5"/>
+            
+            <Button x:Name="OverlayBack"
+                    Content="&lt;-"
+                    Click="OverlayBack_Click"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Width="62"
+                    Height="40"
+                    Margin="5"
+                    Style="{StaticResource ForegroundButtons}"/>
+        </Grid>
+        
+        
+        <Grid x:Name="Content">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" 
+                     x:Name="AlbumNameDisplay"
+                     LostFocus="AlbumNameDisplay_LostFocus"
+                     KeyDown="AlbumNameDisplay_KeyDown"
+                     FontSize="23"
+                     VerticalAlignment="Center"
+                     Style="{StaticResource BasicInput}"/>
+
+                <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+
+                    <Button x:Name="Add"
+                        Click="Add_Click"
+                        Width="62"
+                        Margin="3"
+                        Style="{StaticResource ForegroundButtons}">
+
+                        <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\AddIcon.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+
+                    </Button>
+
+                    <Button x:Name="Settings"
+                        Click="Settings_Click"
+                        Width="62"
+                        Margin="3"
+                        Style="{StaticResource ForegroundButtons}">
+
+                        <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\SettingsIcon.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+
+                    </Button>
+
+                </StackPanel>
+            </Grid>
+
+            <Rectangle Grid.Row="0"
+                   Height="1"
+                   VerticalAlignment="Bottom"
+                   Style="{StaticResource DividingLine}"/>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                <ItemsControl x:Name="Body"
+                          Margin="5">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>
