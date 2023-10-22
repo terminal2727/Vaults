@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,9 +28,12 @@ namespace VaultsII.Views.HomePanelViews {
     /// Interaction logic for Album.xaml
     /// </summary>
     public partial class Album : UserControl {
+        private bool isPlaying = false;
         private int numberOfColumns = 0;
         private double totalItemSpace = 0;
         private double maximumAspectLength = 325;
+
+        private TimeSpan lastPosition = TimeSpan.Zero;
 
         private LayoutDirection layoutDirection = LayoutDirection.Horizontal;
 
@@ -111,16 +115,21 @@ namespace VaultsII.Views.HomePanelViews {
             }
         }
 
-        private void PeekVideo(object o, MouseEventArgs e, bool v) {
+        private async void PeekVideo(object o, MouseEventArgs e, bool isEntering) {
             MediaElement video = (MediaElement)o;
-
             video.LoadedBehavior = MediaState.Manual;
 
-            if (v) {
-                video.Play();  
-            } else {
+            if (!isEntering) {
                 video.Stop();
+                return;
             }
+
+            await Task.Delay(500); // Wait a second in case the overlay should fire instead
+
+            if (!video.IsMouseOver) { return; }
+
+            video.Volume = 0;
+            video.Play();
         }
 
         private void ShowOverlay(object sender, MouseButtonEventArgs e) {
@@ -154,16 +163,39 @@ namespace VaultsII.Views.HomePanelViews {
                     Margin = new Thickness(53),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    LoadedBehavior = MediaState.Pause
+                    LoadedBehavior = MediaState.Play
                 };
 
+                video.MouseLeftButtonDown += OverlayTogglePlay;
+                video.Position = lastPosition; // Probably unneeded
+
                 Overlay.Children.Add(video);
+
+                isPlaying = true;
+            }
+        }
+
+        private void OverlayTogglePlay(object sender, MouseButtonEventArgs e) {
+            MediaElement video = (MediaElement)sender;
+
+            video.LoadedBehavior = MediaState.Manual;
+
+            if (!isPlaying) {
+                isPlaying = true;
+                video.Position = lastPosition;
+                video.Play();
+            } else {
+                isPlaying = false;
+                lastPosition = video.Position;
+                video.Stop();
             }
         }
 
         private void OverlayBack_Click(object sender, RoutedEventArgs e) {
             Overlay.Visibility = Visibility.Hidden;
             Overlay.Children.RemoveAt(2); // Should always be the media container
+
+            lastPosition = TimeSpan.Zero;
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e) {
