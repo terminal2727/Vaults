@@ -102,13 +102,14 @@ namespace VaultsII.Display {
                     }
 
                     AspectRatio ratio = new(scaledWidth, scaledHeight);
+
                     Uri path = new(v_container.FilePath, UriKind.RelativeOrAbsolute);
 
                     MediaElement video = new() { 
                         Source = path,
                         Height = scaledHeight,
                         Width = scaledWidth,
-                        LoadedBehavior = MediaState.Stop
+                        LoadedBehavior = MediaState.Pause
                     };
 
                     // Determines if the image can fit into any spaces
@@ -186,11 +187,23 @@ namespace VaultsII.Display {
         }
     }
 
+    public enum SortDirection {
+        Ascending, Descending
+    }
+
+    public enum SortType {
+        Chronological, Name, Custom
+    }
+
     public struct Mosaic {
         public List<StackPanel> segments { get; set; }
+        public SortDirection sortDirection { get; set; }
+        public SortType sortType { get; set; }
 
         public Mosaic(List<StackPanel> segments) {
             this.segments = segments;
+            sortDirection = SortDirection.Ascending;
+            sortType = SortType.Chronological;
         }
     }
 

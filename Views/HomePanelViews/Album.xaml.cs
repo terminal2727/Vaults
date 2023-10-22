@@ -100,8 +100,10 @@ namespace VaultsII.Views.HomePanelViews {
                 foreach (var item in segment.Children) {
                     if (item is Image image) {
                         image.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);
+
                     } else if (item is MediaElement video) {
                         video.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);
+
                         video.MouseEnter += (o, e) => PeekVideo(o, e, true);
                         video.MouseLeave += (o, e) => PeekVideo(o, e, false);
                     }
