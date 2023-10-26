@@ -92,10 +92,14 @@ namespace VaultsII.Views.HomePanelViews {
         public void PopulateMosaic() {
             List<StackPanel> segments = new();
 
-            if (layoutDirection == LayoutDirection.Horizontal) {
-                segments = MosaicConstructor.ConstructHorizontalMosaic(storage.Current, maximumAspectLength, totalItemSpace);
-            } else { 
-                //constructed = MosaicConstructor.ConstructVerticalMosaic(); 
+            if (storage.Current.Mosaic == null) {
+                if (layoutDirection == LayoutDirection.Horizontal) {
+                    segments = MosaicConstructor.ConstructHorizontalMosaic(storage.Current, maximumAspectLength, totalItemSpace);
+                } else {
+                    segments = MosaicConstructor.ConstructVerticalMosaic(); 
+                }
+            } else {
+                segments = MosaicConstructor.ConstructMosaicFromAlbumData(storage.Current, maximumAspectLength, totalItemSpace);
             }
 
             Body.ItemsSource = segments;

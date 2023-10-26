@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
-using System.Text.Json.Serialization;
-using System.Windows.Forms;
+
+/*
+ * To consider: Creating all 3 possible mosaics and then caching all 3 at the same time
+ */
 
 namespace VaultsII.MediaStorage {
     public class AlbumData {
         public string Name { get; set; }
         
         public List<Container> Media;
+        public List<List<Container>> Mosaic; 
 
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
@@ -49,10 +51,12 @@ namespace VaultsII.MediaStorage {
             }
         }
 
+        public void SetMosaic(List<List<Container>> Mosaic) => this.Mosaic = Mosaic;
+
         public void SortMedia() => Media = Media.OrderByDescending(item => item.Created).ToList(); 
 
         public AlbumDataPackage GetAlbumDataPackage() {
-            return new AlbumDataPackage(Name, Media, Created, Updated);
+            return new AlbumDataPackage(Name, Media, Created, Updated, Mosaic);
         }
 
         private bool ContainsPath(string path) {
@@ -92,6 +96,7 @@ namespace VaultsII.MediaStorage {
     public struct AlbumDataPackage {
         public string Name { get; set; }
 
+        public List<List<Container>> Mosaic;
         public ImageContainer[] Images { get; set; }
         public VideoContainer[] Videos { get; set; }
         public GifContainer[] Gifs { get; set; }
@@ -101,10 +106,11 @@ namespace VaultsII.MediaStorage {
 
         public bool IsEmpty { get; set; }
 
-        public AlbumDataPackage(string Name, List<Container> Media, DateTime Created, DateTime Updated) {
+        public AlbumDataPackage(string Name, List<Container> Media, DateTime Created, DateTime Updated, List<List<Container>> Mosaic) {
             this.Name = Name;
             this.Created = Created;
             this.Updated = Updated;
+            this.Mosaic = Mosaic;
 
             ImageContainer[] imageContainers = new ImageContainer[Media.Count];
             VideoContainer[] videoContainers = new VideoContainer[Media.Count];
@@ -137,6 +143,7 @@ namespace VaultsII.MediaStorage {
         public AlbumDataPackage() {
             Name = String.Empty;
 
+            Mosaic = new();
             Images = Array.Empty<ImageContainer>();
             Videos = Array.Empty<VideoContainer>();
             Gifs = Array.Empty<GifContainer>();
