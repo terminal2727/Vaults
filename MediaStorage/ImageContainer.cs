@@ -11,6 +11,9 @@ namespace VaultsII.MediaStorage {
         public override string[] Tags { get; set; }
         public override DateTime Created { get; set; }
         public override ContainerType Type { get; set; }
+        public override double Width { get; set; }
+        public override double Height { get; set; }
+        public override bool IsMetaDataLoaded { get; set; }
 
         public ImageContainer(string FilePath, string[] Tags, ContainerType Type) { 
             this.FilePath = FilePath;

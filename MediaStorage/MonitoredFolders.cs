@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using CS = VaultsII.CachingSystem;
+using static VaultsII.MediaStorage.MetadataManager;
 
 namespace VaultsII.MediaStorage {
     public class MonitoredFolders {
@@ -29,11 +30,11 @@ namespace VaultsII.MediaStorage {
 
             string[] filePaths = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
             foreach (string filePath in filePaths) {
-               
                 storage.Everything.AddMedia(filePath);
             }
 
             AlbumStorage.SaveAlbumChanges(storage.Everything);
+            storage.Everything.Media.UpdateContainerMetadata();
             CS.CachingSystem.SaveMonitoredFolders(paths.ToArray());
 
             OnMonitoredFoldersUpdated?.Invoke(this, EventArgs.Empty);
@@ -68,17 +69,9 @@ namespace VaultsII.MediaStorage {
 
             OnMonitoredFoldersUpdated?.Invoke(this, EventArgs.Empty);
         }
-
+        
         public void UpdateMonitoredFolders() {
-            /*for (int i =  0; i < paths.Count; i++) {
-                if (!Directory.Exists(paths[i])) {
-                    FileSystemWatcher watcher = watchers[i];
-                    watcher.Dispose();
 
-                    watchers.RemoveAt(i);
-                    paths.Remove(paths[i]); 
-                }
-            }*/
         }
 
         public string GetFormattedList() {
@@ -117,12 +110,12 @@ namespace VaultsII.MediaStorage {
                 watchers.Add(@new);
 
                 int index = watchers.IndexOf(@new);
+
+                @new.Created += OnFileCreated;
+                @new.Deleted += OnFileDeleted;
+                @new.Renamed += OnFileRenamed;
             
-                watchers[index].Created += OnFileCreated;
-                watchers[index].Deleted += OnFileDeleted;
-                watchers[index].Renamed += OnFileRenamed;
-            
-                watchers[index].EnableRaisingEvents = true;
+                @new.EnableRaisingEvents = true;
             }
 
             storage = AlbumStorage.Instance;

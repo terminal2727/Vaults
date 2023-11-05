@@ -10,6 +10,9 @@ namespace VaultsII.MediaStorage {
         public abstract string[] Tags { get; set; }
         public abstract DateTime Created { get; set; }
         public abstract ContainerType Type { get; set; }
+        public abstract double Width { get; set; }
+        public abstract double Height { get; set; }
+        public abstract bool IsMetaDataLoaded { get; set; }
     }
     
     public enum ContainerType {

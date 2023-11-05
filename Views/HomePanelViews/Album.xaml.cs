@@ -15,6 +15,8 @@ using VaultsII.MediaStorage;
 using VaultsII.Views.Modals.AlbumModals;
 using WpfAnimatedGif;
 
+#pragma warning disable CS8604 // Possible null reference argument.
+
 /*
  * TODO:
  * Parallelize Container => Image/AnimatedImage/MediaElement creation
@@ -29,25 +31,21 @@ namespace VaultsII.Views.HomePanelViews {
     /// </summary>
     public partial class Album : UserControl {
         private bool isPlaying = false;
-        private int numberOfColumns = 0;
         private double totalItemSpace = 0;
-        private double maximumAspectLength = 325;
+        private int numberOfColumns = 5;
+
+        private List<FrameworkElement> segments;
 
         private TimeSpan lastPosition = TimeSpan.Zero;
 
         private LayoutDirection layoutDirection = LayoutDirection.Horizontal;
 
-        private readonly List<StackPanel> segments;
         private readonly AlbumStorage storage;
         private readonly ViewControl control;
-        
-        private const int MIN_ITEMS_PER_LINE = 3;
 
         public Album() {
             storage = AlbumStorage.Instance;
             control = ViewControl.Instance;
-
-            segments = new();
 
             storage.OnCurrentAlbumChange += (s, e) => UpdateTitle(storage.Current.Name);
             control.OnViewChanged += (s, e) => UpdateTitle(storage.Current.Name);
@@ -69,46 +67,36 @@ namespace VaultsII.Views.HomePanelViews {
 
             await Body.GetLoadedAwaitable();
 
-            UpdateDisplay();
+            totalItemSpace = Body.ActualWidth;
+            Configs.SetTotalWidth(totalItemSpace);
 
             PopulateMosaic();
 
             UpdateTitle(storage.Current.Name);
         }
 
-        private void UpdateDisplay() {
-            totalItemSpace = Body.ActualWidth;
-            int itemsPerLine = (int)MathF.Floor((float)(totalItemSpace / maximumAspectLength));
+        public async void PopulateMosaic() {
+            segments = new();
 
-            // Only really needed if the window is scaled down. 325 * 3 + 15 should be less that 1080
-            if (itemsPerLine < MIN_ITEMS_PER_LINE) {
-                maximumAspectLength = totalItemSpace / MIN_ITEMS_PER_LINE;
-                numberOfColumns = MIN_ITEMS_PER_LINE;
-            } 
-
-            numberOfColumns = itemsPerLine;
-        }
-
-        public void PopulateMosaic() {
-            List<StackPanel> segments = new();
-
-            if (storage.Current.Mosaic == null) {
-                if (layoutDirection == LayoutDirection.Horizontal) {
-                    segments = MosaicConstructor.ConstructHorizontalMosaic(storage.Current, maximumAspectLength, totalItemSpace);
-                } else {
-                    segments = MosaicConstructor.ConstructVerticalMosaic(); 
-                }
+            if (layoutDirection == LayoutDirection.Horizontal) {
+                segments = await storage.Current.ConstructHorizontalMosaic();
             } else {
-                segments = MosaicConstructor.ConstructMosaicFromAlbumData(storage.Current, maximumAspectLength, totalItemSpace);
+                /*segments = storage.Current.ConstructVerticalMosaic();*/
             }
 
             Body.ItemsSource = segments;
 
-            foreach (var segment in segments) {
-                foreach (var item in segment.Children) {
-                    if (item is Image image) {
-                        image.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);
+            foreach (FrameworkElement segment in segments) {
+                if (segment is not StackPanel panel) { continue; }
 
+                panel.Background = new SolidColorBrush(Colors.Transparent);
+
+                panel.MouseEnter += (o, e) => SegmentHoverOver(o, e, true);
+                panel.MouseLeave += (o, e) => SegmentHoverOver(o, e, false);
+
+                foreach (var item in panel.Children) {
+                    if (item is Image image) {
+                        image.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);;
                     } else if (item is MediaElement video) {
                         video.MouseLeftButtonDown += (s, e) => ShowOverlay(s, e);
 
@@ -119,7 +107,9 @@ namespace VaultsII.Views.HomePanelViews {
             }
         }
 
-        private async void PeekVideo(object o, MouseEventArgs e, bool isEntering) {
+        private static async void PeekVideo(object o, MouseEventArgs e, bool isEntering) {
+            if (e.LeftButton == MouseButtonState.Pressed) { return; }
+
             MediaElement video = (MediaElement)o;
             video.LoadedBehavior = MediaState.Manual;
 
@@ -128,7 +118,7 @@ namespace VaultsII.Views.HomePanelViews {
                 return;
             }
 
-            await Task.Delay(500); // Wait a second in case the overlay should fire instead
+            await Task.Delay(500);
 
             if (!video.IsMouseOver) { return; }
 
@@ -225,51 +215,19 @@ namespace VaultsII.Views.HomePanelViews {
             }
         }
 
-        private void UpdateTitle(string name) => AlbumNameDisplay.Text = name;
-
+        private void SegmentHoverOver(object o, MouseEventArgs e, bool v) {
+            /*currentStackPanel = v ? o as StackPanel : null;*/
+        }
         private void SwitchLayout(bool horizontal) => layoutDirection = horizontal ? LayoutDirection.Horizontal : LayoutDirection.Vertical;
+        private void UpdateTitle(string name) => AlbumNameDisplay.Text = name;
 
         enum LayoutDirection {
             Horizontal = 0, Vertical = 1
-        }
-
-        readonly struct EmptySpace {
-            public readonly int Index { get; }
-            public readonly double Space { get; }
-
-            public EmptySpace(int index, double space) {
-                Index = index;
-                Space = space;
-            }
         }
     }
 
     public static class AlbumExtensions {
         public static Task GetLoadedAwaitable(this ItemsControl item) {
-            var tcs = new TaskCompletionSource<object>();
-
-            void Completed() {
-                item.Loaded -= (s, e) => Completed();
-                tcs.SetResult(null);
-            }
-
-            item.Loaded += (s, e) => Completed();
-            return tcs.Task;
-        }
-
-        public static Task GetLoadedAwaitable(this Image item) {
-            var tcs = new TaskCompletionSource<object>();
-
-            void Completed() {
-                item.Loaded -= (s, e) => Completed();
-                tcs.SetResult(null);
-            }
-
-            item.Loaded += (s, e) => Completed();
-            return tcs.Task;
-        }
-
-        public static Task GetLoadedAwaitable(this MediaElement item) {
             var tcs = new TaskCompletionSource<object>();
 
             void Completed() {

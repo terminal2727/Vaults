@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using VaultsII.Display;
 
 /*
  * To consider: Creating all 3 possible mosaics and then caching all 3 at the same time
@@ -10,9 +11,12 @@ using System.Linq;
 namespace VaultsII.MediaStorage {
     public class AlbumData {
         public string Name { get; set; }
-        
+
         public List<Container> Media;
-        public List<List<Container>> Mosaic; 
+        public List<string> ChronologicalMosaic { get; private set; }
+        public List<string> CustomMosaic { get; private set; }
+        public List<string> DateMosaic { get; private set; }
+        public List<string> NameMosaic { get; private set; }
 
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
@@ -51,12 +55,28 @@ namespace VaultsII.MediaStorage {
             }
         }
 
-        public void SetMosaic(List<List<Container>> Mosaic) => this.Mosaic = Mosaic;
-
         public void SortMedia() => Media = Media.OrderByDescending(item => item.Created).ToList(); 
 
+        public void UpdateMosaic(Configs.SortingStyle style, List<string> items) {
+            // Add to AlbumDataPackage
+            switch (style) {
+                case Configs.SortingStyle.Custom:
+                    CustomMosaic = items;
+                    break;
+                case Configs.SortingStyle.Date: 
+                    DateMosaic = items;
+                    break;
+                case Configs.SortingStyle.Name:
+                    NameMosaic = items;
+                    break;
+                case Configs.SortingStyle.Chronological:
+                    ChronologicalMosaic = items;
+                    break;
+            }
+        }
+
         public AlbumDataPackage GetAlbumDataPackage() {
-            return new AlbumDataPackage(Name, Media, Created, Updated, Mosaic);
+            return new AlbumDataPackage(Name, Media, Created, Updated);
         }
 
         private bool ContainsPath(string path) {
@@ -96,7 +116,6 @@ namespace VaultsII.MediaStorage {
     public struct AlbumDataPackage {
         public string Name { get; set; }
 
-        public List<List<Container>> Mosaic;
         public ImageContainer[] Images { get; set; }
         public VideoContainer[] Videos { get; set; }
         public GifContainer[] Gifs { get; set; }
@@ -106,11 +125,10 @@ namespace VaultsII.MediaStorage {
 
         public bool IsEmpty { get; set; }
 
-        public AlbumDataPackage(string Name, List<Container> Media, DateTime Created, DateTime Updated, List<List<Container>> Mosaic) {
+        public AlbumDataPackage(string Name, List<Container> Media, DateTime Created, DateTime Updated) {
             this.Name = Name;
             this.Created = Created;
             this.Updated = Updated;
-            this.Mosaic = Mosaic;
 
             ImageContainer[] imageContainers = new ImageContainer[Media.Count];
             VideoContainer[] videoContainers = new VideoContainer[Media.Count];
@@ -143,7 +161,6 @@ namespace VaultsII.MediaStorage {
         public AlbumDataPackage() {
             Name = String.Empty;
 
-            Mosaic = new();
             Images = Array.Empty<ImageContainer>();
             Videos = Array.Empty<VideoContainer>();
             Gifs = Array.Empty<GifContainer>();
