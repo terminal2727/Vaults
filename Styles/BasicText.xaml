@@ -5,7 +5,7 @@
         
         <Style.Setters>
             <Setter Property="FontFamily" Value="Bahnschrift"/>
-            <Setter Property="Foreground" Value="#d2dfff"/>
+            <Setter Property="Foreground" Value="#aac8fe"/>
         </Style.Setters>
         
     </Style>

@@ -19,10 +19,8 @@ using WpfAnimatedGif;
 
 /*
  * TODO:
- * Parallelize Container => Image/AnimatedImage/MediaElement creation
- * Add drag and drop feature
- * Add clickable media containers
- * Add clean up function where events are removed when album is changed
+ * Add drag and drop feature (Maybe)
+ * Add overlay division screen
  */
 
 namespace VaultsII.Views.HomePanelViews {
@@ -31,7 +29,6 @@ namespace VaultsII.Views.HomePanelViews {
     /// </summary>
     public partial class Album : UserControl {
         private bool isPlaying = false;
-        private double totalItemSpace = 0;
         private int numberOfColumns = 5;
 
         private List<FrameworkElement> segments;
@@ -43,11 +40,14 @@ namespace VaultsII.Views.HomePanelViews {
         private readonly AlbumStorage storage;
         private readonly ViewControl control;
 
+        private const double MAX_HEIGHT = 1000;
+        private const double MIN_HEIGHT = 950;
+
         public Album() {
             storage = AlbumStorage.Instance;
             control = ViewControl.Instance;
 
-            storage.OnCurrentAlbumChange += (s, e) => UpdateTitle(storage.Current.Name);
+            storage.OnCurrentAlbumChange += (s, e) => CreateMosaic();
             control.OnViewChanged += (s, e) => UpdateTitle(storage.Current.Name);
 
             WindowSizeChange.OnWindowSizeChanged += (s, e) => CreateMosaic();
@@ -63,16 +63,19 @@ namespace VaultsII.Views.HomePanelViews {
         }
 
         private async void CreateMosaic() {
-            UpdateTitle("Loading...");
+            if (!Body.IsLoaded) { await Body.GetLoadedAwaitable(); }
 
-            await Body.GetLoadedAwaitable();
+            if (storage.Current.Media.Count != 0) {
+                Configs.SetMaxHeight(MAX_HEIGHT);
+                Configs.SetMinHeight(MIN_HEIGHT);
+                Configs.SetTotalWidth(Body.ActualWidth);
 
-            totalItemSpace = Body.ActualWidth;
-            Configs.SetTotalWidth(totalItemSpace);
+                PopulateMosaic();
+            } else {
+                ClearAlbumContents();
+            }
 
-            PopulateMosaic();
-
-            UpdateTitle(storage.Current.Name);
+            Add.Visibility = storage.Current == storage.Everything ? Visibility.Hidden : Visibility.Visible;
         }
 
         public async void PopulateMosaic() {
@@ -89,10 +92,7 @@ namespace VaultsII.Views.HomePanelViews {
             foreach (FrameworkElement segment in segments) {
                 if (segment is not StackPanel panel) { continue; }
 
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-
-                panel.MouseEnter += (o, e) => SegmentHoverOver(o, e, true);
-                panel.MouseLeave += (o, e) => SegmentHoverOver(o, e, false);
+                panel.Background = Brushes.Transparent;
 
                 foreach (var item in panel.Children) {
                     if (item is Image image) {
@@ -137,9 +137,9 @@ namespace VaultsII.Views.HomePanelViews {
                 };
 
                 if (imageSource.Source is not BitmapImage _) {
-                    ImageSource sauce = ImageBehavior.GetAnimatedSource(imageSource);
+                    ImageSource source = ImageBehavior.GetAnimatedSource(imageSource);
 
-                    ImageBehavior.SetAnimatedSource(image, sauce);
+                    ImageBehavior.SetAnimatedSource(image, source);
                     ImageBehavior.SetRepeatBehavior(image, RepeatBehavior.Forever);
                 } else {
                     image = new() {
@@ -198,7 +198,8 @@ namespace VaultsII.Views.HomePanelViews {
         }
 
         private void Add_Click(object sender, RoutedEventArgs e) {
-
+            AddPhotosModal modal = new();
+            modal.Show();
         }
 
         private void AlbumNameDisplay_LostFocus(object sender, RoutedEventArgs e) {
@@ -215,15 +216,22 @@ namespace VaultsII.Views.HomePanelViews {
             }
         }
 
-        private void SegmentHoverOver(object o, MouseEventArgs e, bool v) {
-            /*currentStackPanel = v ? o as StackPanel : null;*/
-        }
         private void SwitchLayout(bool horizontal) => layoutDirection = horizontal ? LayoutDirection.Horizontal : LayoutDirection.Vertical;
         private void UpdateTitle(string name) => AlbumNameDisplay.Text = name;
 
-        enum LayoutDirection {
-            Horizontal = 0, Vertical = 1
+        private void ClearAlbumContents() {
+            Body.ItemsSource = new List<FrameworkElement>() { 
+                new TextBlock() { 
+                    Text = storage.Current.Media.Count == 0 ? "Nothing here!" : $"Loading {storage.Current.Media.Count} files", 
+                    Style = Application.Current.FindResource("DetailText") as Style, 
+                    FontSize = 32 
+                } 
+            };
         }
+    }
+
+    public enum LayoutDirection {
+        Horizontal = 0, Vertical = 1
     }
 
     public static class AlbumExtensions {

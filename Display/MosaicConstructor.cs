@@ -6,29 +6,17 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using VaultsII.MediaStorage;
 using WpfAnimatedGif;
-using FFMpegCore;
 using System.Threading.Tasks;
-using System.Windows.Forms.Design.Behavior;
 using System.Windows.Shapes;
-using System.Data;
 using System.Windows;
-
-/* TODO:
- * Modify construction function to resemble Google Photos more.
- * Best I can tell, there's variable height values per line, but only to a point - it seems like the
- * heights are always between 350 and 370 (px). It also seems to aim for ~7 items per line, which
- * seems like a good number to me.
- * 
- * The process is probably something like:
- *     1. Get 7 items
- *     2. Set their cumulative width to the line's length (+ spacers, which will have to be... transparent rectangles?)
- *     3. Check if their heights are within the predefined limits
- *     4. If they're not, remove one photo, and check again.
- *     5. Ad nauseum
- */
+using Microsoft.VisualBasic;
+using System.Collections.ObjectModel;
 
 namespace VaultsII.Display {
     public static class MosaicConstructor {
+        public delegate void SegmentConstructed(List<FrameworkElement> segment);
+        public static event SegmentConstructed OnSegmentConstructed;
+
         public static async Task<List<FrameworkElement>> ConstructHorizontalMosaic(this AlbumData data) {
             await data.Media.UpdateContainerMetadata();
             data.SortMedia();
@@ -88,9 +76,11 @@ namespace VaultsII.Display {
                 #endregion
 
                 #region Constructing the StackPanel
+
                 StackPanel panel = new() { Orientation = Orientation.Horizontal };
 
-                foreach (Container container in contestants) {
+                for (int j = 0; j < contestants.Count; j++) {
+                    Container container = contestants[j];
                     Uri path = new(container.FilePath, UriKind.RelativeOrAbsolute);
 
                     bool isVideo = container is VideoContainer;
@@ -162,15 +152,17 @@ namespace VaultsII.Display {
         }
     }
     public static class Configs {
-        public readonly static double MaxHeight = 1000;
-        public readonly static double MinHeight = 975;
         public readonly static int PreferredItemsPerLine = 7;
         public readonly static int SpacerWidth = 3;
 
+        public static double  MaxHeight { get; private set; } = 1000;
+        public static double MinHeight { get; private set; }  = 975;
         public static double TotalWidth { get; private set; }
         public static SortingStyle Style { get; private set; } = SortingStyle.Chronological;
         public static SortingDirections Direction { get; private set; } = SortingDirections.Ascending;
 
+        public static void SetMaxHeight(double maxHeight) => MaxHeight = maxHeight;
+        public static void SetMinHeight(double minHeight) => MinHeight = minHeight;
         public static void SetTotalWidth(double width) => TotalWidth = width;
         public static void SetStyle(SortingStyle style) => Style = style;
         public static void SetDirection(SortingDirections direction) => Direction = direction;

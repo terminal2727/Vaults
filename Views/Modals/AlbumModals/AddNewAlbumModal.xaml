@@ -10,15 +10,15 @@
         Width="659"
         WindowStyle="None"
         ResizeMode="NoResize">
-    
-    <Grid Background="#353943">
+
+    <Grid Background="#2e3a4f">
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
         <Rectangle Grid.Row="0"
-                   Fill="#474f63"
+                   Fill="#586f99"
                    MouseLeftButtonDown="Rectangle_MouseLeftButtonDown"/>
 
         <Rectangle Grid.Row="1"
@@ -30,7 +30,7 @@
                    Text="Input A New Album Name"
                    FontFamily="Bahnschrift"
                    FontSize="15"
-                   Foreground="White"
+                   Foreground="#aac8fe"
                    Margin="5, 4, 5, 5"/>
 
         <Button x:Name="CancelButton"
@@ -49,7 +49,8 @@
             <TextBox x:Name="AlbumNameTextBox"
                      Margin="5"
                      Width="516"
-                     Height="30"/>
+                     Height="30"
+                     Background="#aac8fe"/>
 
             <Button x:Name="CreateButton"
                     Content="Create Album"

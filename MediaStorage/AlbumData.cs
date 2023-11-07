@@ -87,6 +87,19 @@ namespace VaultsII.MediaStorage {
             return false;
         }
 
+        public bool TryGetContainer(string path, out Container container) {
+            container = null;
+
+            foreach (Container c in Media) {
+                if (c.FilePath == path) { continue; }
+                
+                container = c;
+                return true;
+            }
+
+            return false;
+        }
+
         public AlbumData(AlbumDataPackage package) {
             this.Name = package.Name;
             this.Created = package.Created;

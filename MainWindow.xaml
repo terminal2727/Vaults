@@ -16,9 +16,8 @@
     <Window.DataContext>
         <views:ViewControl/>
     </Window.DataContext>
-    
-    
-    <Grid Background="#353943">
+
+    <Grid Background="#2e3a4f">
         <Grid.RowDefinitions>
             <RowDefinition Height="17"/>
             <RowDefinition Height="40"/>
@@ -27,7 +26,7 @@
         </Grid.RowDefinitions>
 
         <Rectangle Grid.Row="0"
-                   Fill="#474f63"
+                   Fill="#586f99"
                    MouseLeftButtonDown="GrabBar_MouseLeftButtonDown"/>
 
         <StackPanel Orientation="Horizontal"
@@ -36,17 +35,17 @@
             <Button x:Name="Minimize"
                     Click="Minimize_Click"
                     Content="_"
-                    Style="{StaticResource BackgroundButtons}"/>
+                    Style="{StaticResource BackgroundButtons}" Height="17"/>
 
             <Button x:Name="Maximize"
                     Click="Maximize_Click"
                     Content="⧠"
-                    Style="{StaticResource BackgroundButtons}"/>
+                    Style="{StaticResource BackgroundButtons}" Height="17"/>
 
             <Button x:Name="Close"
                     Click="Close_Click"
                     Content="X"
-                    Style="{StaticResource BackgroundButtons}"/>
+                    Style="{StaticResource BackgroundButtons}" Height="17"/>
             
         </StackPanel>
 
@@ -81,8 +80,50 @@
                         Style="{StaticResource BackgroundButtons}">
 
                         <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\BackIcon.png" 
-                            RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                            RenderOptions.BitmapScalingMode="HighQuality"/>
                     
+                </Button>
+
+                <Button Grid.Row="1"
+                        x:Name="AddMonitoredFolder"
+                        Click="AddMonitoredFolder_Click"
+                        FontSize="15"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Width="50"
+                        Style="{StaticResource BackgroundButtons}">
+
+                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\AddFolderIcon.png" 
+                            RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                </Button>
+
+                <Button Grid.Row="1"
+                        x:Name="RemoveMonitoredFolder"
+                        Click="RemoveMonitoredFolder_Click"
+                        FontSize="15"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Width="50"
+                        Style="{StaticResource BackgroundButtons}">
+
+                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\RemoveFolderIcon.png" 
+                            RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                </Button>
+
+                <Button Grid.Row="1"
+                        x:Name="SortNewContent"
+                        Click="SortNewContent_Click"
+                        FontSize="15"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Width="50"
+                        Style="{StaticResource BackgroundButtons}">
+
+                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\SortIcon.png" 
+                            RenderOptions.BitmapScalingMode="HighQuality"/>
+
                 </Button>
 
             </StackPanel>
@@ -102,7 +143,7 @@
                         Style="{StaticResource BackgroundButtons}">
 
                     <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\HomeIcon.png"
-                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
 
                 </Button>
 

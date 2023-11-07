@@ -5,6 +5,8 @@ using System.Windows.Input;
 using VaultsII.Core;
 using VaultsII.MediaStorage;
 using VaultsII.Views;
+using VaultsII.Views.Modals;
+using WinForms = System.Windows.Forms;
 
 namespace VaultsII {
     /// <summary>
@@ -12,14 +14,14 @@ namespace VaultsII {
     /// </summary>
     public partial class MainWindow : Window {
         private readonly ViewControl control;
-        private readonly MonitoredFolders monitored;
+        private readonly MonitoredFolders monitoredFolders;
         private readonly AlbumStorage storage;
 
         public MainWindow() {
             InitializeComponent();
 
             control = ViewControl.Instance;
-            monitored = MonitoredFolders.Instance; // Called to have the instance created before anything else creates it.
+            monitoredFolders = MonitoredFolders.Instance;
             storage = AlbumStorage.Instance;
 
             storage.OnAlbumsListChange += (s, e) => PopulateAlbumViewsList();
@@ -41,9 +43,7 @@ namespace VaultsII {
 
             everythingButton.Checked += (s, e) => {
                 View.DataContext = control;
-
                 storage.SetCurrentToEverything();
-
                 control.SetAlbumView();
             };
 
@@ -123,6 +123,25 @@ namespace VaultsII {
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) {
             WindowSizeChange.ChangedWindowSize();
+        }
+
+        private void AddMonitoredFolder_Click(object sender, RoutedEventArgs e) {
+            WinForms.FolderBrowserDialog dialog = new();
+            WinForms.DialogResult result = dialog.ShowDialog();
+
+            if (result == WinForms.DialogResult.OK) {
+                string path = dialog.SelectedPath;
+                monitoredFolders.AddNewMonitoredFolderPath(path);
+            }
+        }
+
+        private void RemoveMonitoredFolder_Click(object sender, RoutedEventArgs e) {
+            RemoveMonitoredFoldersModal removeMonitoredFoldersModal = new();
+            removeMonitoredFoldersModal.ShowDialog();
+        }
+
+        private void SortNewContent_Click(object sender, RoutedEventArgs e) {
+
         }
     }
 }

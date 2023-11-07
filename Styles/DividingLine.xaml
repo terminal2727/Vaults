@@ -4,7 +4,7 @@
            x:Key="DividingLine">
         
         <Style.Setters>
-            <Setter Property="Fill" Value="#555c6e"/>
+            <Setter Property="Fill" Value="#586f99"/>
         </Style.Setters>
         
     </Style>

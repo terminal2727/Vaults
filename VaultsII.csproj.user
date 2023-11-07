@@ -19,6 +19,9 @@
     <Compile Update="Views\Modals\AlbumModals\AddNewAlbumModal.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Modals\AlbumModals\AddPhotosModal.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Modals\AlbumModals\AlbumSettings.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -61,6 +64,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Modals\AlbumModals\AddNewAlbumModal.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Modals\AlbumModals\AddPhotosModal.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Modals\AlbumModals\AlbumSettings.xaml">

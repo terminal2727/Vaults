@@ -3,9 +3,9 @@
     <Style TargetType="{x:Type Button}"
            x:Key="ForegroundButtons">
         <Style.Setters>
-            <Setter Property="Background" Value="#474f63"/>
-            <Setter Property="Foreground" Value="#d2dfff"/>
-            <Setter Property="BorderBrush" Value="#555c6e"/>
+            <Setter Property="Background" Value="#394a68"/>
+            <Setter Property="Foreground" Value="#aac8fe"/>
+            <Setter Property="BorderBrush" Value="#586f99"/>
             <Setter Property="BorderThickness" Value="2"/>
 
             <Setter Property="FontFamily" Value="Bahnschrift"/>

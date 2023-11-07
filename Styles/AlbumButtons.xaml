@@ -21,7 +21,7 @@
             </Setter>
 
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#d2dfff"/>
+            <Setter Property="Foreground" Value="#aac8fe"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontFamily" Value="Bahnschrift"/>
             <Setter Property="FontSize" Value="15"/>
@@ -30,7 +30,7 @@
         </Style.Setters>
         <Style.Triggers>
             <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background" Value="#474f63"/>
+                <Setter Property="Background" Value="#394a68"/>
             </Trigger>
         </Style.Triggers>
     </Style>

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\commi\source\repos\VaultsII\VaultsII\App.xaml
-14-1167841726
+151854327803
 
-262125800631
+27628620519
 206705752719
-Controls\VideoPlayer.xaml;MainWindow.xaml;Styles\AlbumButtons.xaml;Styles\BackgroundButtons.xaml;Styles\BasicInput.xaml;Styles\BasicText.xaml;Styles\DetailText.xaml;Styles\DividingLine.xaml;Styles\ForegroundButtons.xaml;Views\HomePanelViews\Album.xaml;Views\HomePanelViews\Start.xaml;Views\Modals\AlbumModals\AddNewAlbumModal.xaml;Views\Modals\AlbumModals\AlbumSettings.xaml;Views\Modals\RemoveMonitoredFoldersModal.xaml;
+Controls\VideoPlayer.xaml;MainWindow.xaml;Styles\AlbumButtons.xaml;Styles\BackgroundButtons.xaml;Styles\BasicInput.xaml;Styles\BasicText.xaml;Styles\DetailText.xaml;Styles\DividingLine.xaml;Styles\ForegroundButtons.xaml;Views\HomePanelViews\Album.xaml;Views\HomePanelViews\Start.xaml;Views\Modals\AlbumModals\AddNewAlbumModal.xaml;Views\Modals\AlbumModals\AddPhotosModal.xaml;Views\Modals\AlbumModals\AlbumSettings.xaml;Views\Modals\RemoveMonitoredFoldersModal.xaml;
 
 False
 
