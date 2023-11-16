@@ -49,3 +49,5 @@ C:\Users\commi\source\repos\VaultsII\VaultsII\bin\Debug\net6.0-windows\System.Te
 C:\Users\commi\source\repos\VaultsII\VaultsII\bin\Debug\net6.0-windows\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll
 C:\Users\commi\source\repos\VaultsII\VaultsII\obj\Debug\net6.0-windows\Views\Modals\AlbumModals\AddPhotosModal.g.cs
 C:\Users\commi\source\repos\VaultsII\VaultsII\obj\Debug\net6.0-windows\Views\Modals\AlbumModals\AddPhotosModal.baml
+C:\Users\commi\source\repos\VaultsII\VaultsII\obj\Debug\net6.0-windows\Views\Modals\AlbumSelectionModal.g.cs
+C:\Users\commi\source\repos\VaultsII\VaultsII\obj\Debug\net6.0-windows\Views\Modals\AlbumSelectionModal.baml

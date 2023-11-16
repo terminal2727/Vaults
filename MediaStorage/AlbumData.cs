@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Controls;
 using VaultsII.Display;
 
 /*
@@ -12,11 +15,11 @@ namespace VaultsII.MediaStorage {
     public class AlbumData {
         public string Name { get; set; }
 
-        public List<Container> Media;
-        public List<string> ChronologicalMosaic { get; private set; }
-        public List<string> CustomMosaic { get; private set; }
-        public List<string> DateMosaic { get; private set; }
-        public List<string> NameMosaic { get; private set; }
+        public List<MosaicSegment> ChronologicalMosaic { get; private set; }
+        public List<MosaicSegment> CustomMosaic { get; private set; }
+        public List<MosaicSegment> DateMosaic { get; private set; }
+        public List<MosaicSegment> NameMosaic { get; private set; }
+        public List<Container> Media { get; private set; }
 
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
@@ -26,23 +29,27 @@ namespace VaultsII.MediaStorage {
         public static readonly string GifExtension = ".gif";
 
         public void AddMedia(string path) {
+            if (ContainsPath(path)) { return; }
+
             string extension = Path.GetExtension(path);
 
-            if (extension == GifExtension && !ContainsPath(path)) { 
+            if (String.Equals(extension, GifExtension, StringComparison.OrdinalIgnoreCase)) {
                 Media.Add(new GifContainer(path, Array.Empty<string>(), ContainerType.Gif));
                 return;
             }
 
             foreach (string vidExtension in VideoExtensions) {
-                if (extension != vidExtension || ContainsPath(path)) { continue; }
-                Media.Add(new VideoContainer(path, Array.Empty<string>(), ContainerType.Video));
-                return;
+                if (String.Equals(extension, vidExtension, StringComparison.OrdinalIgnoreCase)) {
+                    Media.Add(new VideoContainer(path, Array.Empty<string>(), ContainerType.Video));
+                    return;
+                }
             }
 
             foreach (string imageExtension in ImageExtensions) {
-                if (extension != imageExtension || ContainsPath(path)) { continue; }
-                Media.Add(new ImageContainer(path, Array.Empty<string>(), ContainerType.Image));
-                return;
+                if (String.Equals(extension, imageExtension, StringComparison.OrdinalIgnoreCase)) {
+                    Media.Add(new ImageContainer(path, Array.Empty<string>(), ContainerType.Image));
+                    return;
+                }
             }
         }
 
@@ -55,15 +62,16 @@ namespace VaultsII.MediaStorage {
             }
         }
 
-        public void SortMedia() => Media = Media.OrderByDescending(item => item.Created).ToList(); 
+        public void SortMedia() => Media = Media.OrderByDescending(item => item.Created).ToList();
 
-        public void UpdateMosaic(Configs.SortingStyle style, List<string> items) {
+        public void UpdateMosaic(List<MosaicSegment> items) {
             // Add to AlbumDataPackage
+            Configs.SortingStyle style = items[0].style;
             switch (style) {
                 case Configs.SortingStyle.Custom:
                     CustomMosaic = items;
                     break;
-                case Configs.SortingStyle.Date: 
+                case Configs.SortingStyle.Date:
                     DateMosaic = items;
                     break;
                 case Configs.SortingStyle.Name:
@@ -75,15 +83,15 @@ namespace VaultsII.MediaStorage {
             }
         }
 
-        public AlbumDataPackage GetAlbumDataPackage() {
-            return new AlbumDataPackage(Name, Media, Created, Updated);
-        }
-
         private bool ContainsPath(string path) {
             foreach (Container container in Media) {
-                if (container.FilePath == path) { return true; }
+                if (String.Equals(path, container.FilePath, StringComparison.OrdinalIgnoreCase)) { 
+                    return true; 
+                } else {
+                    Console.WriteLine("ffs");
+                }
             }
-            
+
             return false;
         }
 
@@ -91,8 +99,11 @@ namespace VaultsII.MediaStorage {
             container = null;
 
             foreach (Container c in Media) {
-                if (c.FilePath == path) { continue; }
-                
+                Uri c_path = new(path);
+                Uri p_path = new(c.FilePath, UriKind.Absolute);
+
+                if (Uri.Compare(c_path, p_path, UriComponents.AbsoluteUri, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) != 0) { continue; }
+
                 container = c;
                 return true;
             }
@@ -112,7 +123,7 @@ namespace VaultsII.MediaStorage {
                     Media.Add(package.Images[i]);
                 } else if (package.Videos[i] != null) {
                     Media.Add(package.Videos[i]);
-                } else if(package.Gifs[i] != null) {
+                } else if (package.Gifs[i] != null) {
                     Media.Add(package.Gifs[i]);
                 }
             }
@@ -148,7 +159,7 @@ namespace VaultsII.MediaStorage {
             GifContainer[] gifContainers = new GifContainer[Media.Count];
 
             for (int i = 0; i < Media.Count; i++) {
-                if (Media[i]  is ImageContainer image) {
+                if (Media[i] is ImageContainer image) {
                     imageContainers[i] = image;
                     continue;
                 }
@@ -182,6 +193,16 @@ namespace VaultsII.MediaStorage {
             Updated = default;
 
             this.IsEmpty = true;
+        }
+    }
+
+    public static class AlbumDataSystem {
+        public static void RemoveInvalidFiles(this AlbumData data, MonitoredFolders monitored) {
+            for (int i = 0; i < data.Media.Count; i++) {
+                string parentPath = Path.GetDirectoryName(data.Media[i].FilePath) ?? "";
+                if (File.Exists(data.Media[i].FilePath) && monitored.Contains(parentPath)) { continue; }
+                data.Media.RemoveAt(i);
+            }
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using CS = VaultsII.CachingSystem;
-using static VaultsII.MediaStorage.MetadataManager;
 
 namespace VaultsII.MediaStorage {
     public class MonitoredFolders {
@@ -19,8 +18,6 @@ namespace VaultsII.MediaStorage {
         public EventHandler OnMonitoredFoldersUpdated;
 
         public void AddNewMonitoredFolderPath(string path) {
-            storage = AlbumStorage.Instance;
-
             if (paths.Contains(path)) { return; }
 
             paths.Add(path);
@@ -71,7 +68,7 @@ namespace VaultsII.MediaStorage {
         }
         
         public void UpdateMonitoredFolders() {
-
+            
         }
 
         public string GetFormattedList() {
@@ -89,6 +86,14 @@ namespace VaultsII.MediaStorage {
             return paths.ToArray();
         }
 
+        public bool Contains(string filePath) {
+            foreach (string path in paths) {
+                if (String.Equals(path, filePath, StringComparison.OrdinalIgnoreCase)) { return true; }
+            }
+
+            return false;
+        }
+
         private void OnFileCreated(object sender, FileSystemEventArgs e) {
             
         }
@@ -102,10 +107,25 @@ namespace VaultsII.MediaStorage {
         }
 
         public MonitoredFolders() {
+            // We have to set the instance first, or else the album storage could cause an infinite loop
+            // where the monitored folders instance asks for the storage instance which causes the storage
+            // instance to request the monitored folders instance. But, since it'd still be null, it'd create
+            // a new one, where inside its constructor, it'd attempt to call the storage instance, which is still
+            // null, and so on until the program crashes.
+            Instance = this;
+
             paths = new List<string>(CS.CachingSystem.LoadMonitoredFolders());
             watchers = new();
 
+            storage = AlbumStorage.Instance;
+
             for (int i = 0; i < paths.Count; i++) {
+                if (!Directory.Exists(paths[i])) {
+                    paths.RemoveAt(i);
+                    continue;
+                }
+
+                #region Creating File Watchers
                 FileSystemWatcher @new = new(paths[i]);
                 watchers.Add(@new);
 
@@ -116,10 +136,17 @@ namespace VaultsII.MediaStorage {
                 @new.Renamed += OnFileRenamed;
             
                 @new.EnableRaisingEvents = true;
-            }
+                #endregion
 
-            storage = AlbumStorage.Instance;
-            Instance = this;
+                #region Updating Albums
+                string[] subdirectories = Directory.GetDirectories(paths[i], "*", SearchOption.AllDirectories);
+                foreach (string directory in subdirectories) { if (!paths.Contains(directory)) { paths.Add(directory); } }
+
+                string[] filePaths = Directory.GetFiles(paths[i], "*", SearchOption.AllDirectories);
+                foreach (string filePath in filePaths) { 
+                    storage.Everything.AddMedia(filePath); }
+                #endregion
+            }
         }
     }
 }

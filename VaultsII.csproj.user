@@ -25,6 +25,9 @@
     <Compile Update="Views\Modals\AlbumModals\AlbumSettings.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Modals\AlbumSelectionModal.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Modals\RemoveMonitoredFoldersModal.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -70,6 +73,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Modals\AlbumModals\AlbumSettings.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Modals\AlbumSelectionModal.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Modals\RemoveMonitoredFoldersModal.xaml">

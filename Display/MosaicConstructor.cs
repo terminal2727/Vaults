@@ -9,14 +9,10 @@ using WpfAnimatedGif;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 using System.Windows;
-using Microsoft.VisualBasic;
-using System.Collections.ObjectModel;
+using VaultsII.Controls;
 
 namespace VaultsII.Display {
     public static class MosaicConstructor {
-        public delegate void SegmentConstructed(List<FrameworkElement> segment);
-        public static event SegmentConstructed OnSegmentConstructed;
-
         public static async Task<List<FrameworkElement>> ConstructHorizontalMosaic(this AlbumData data) {
             await data.Media.UpdateContainerMetadata();
             data.SortMedia();
@@ -35,6 +31,8 @@ namespace VaultsII.Display {
                 double tallest = contestants.GetTallestHeight();
                 double cumulativeWidth = contestants.ScaleWidthsToHeight(tallest).GetCumulativeWidth();
                 double newHeight = (cumulativeWidth / Configs.TotalWidth) * tallest;
+
+                if (Configs.TotalWidth == 0) { throw new Exception("Attempted to divide by 0"); }
 
                 if (newHeight > Configs.MaxHeight) {
                     int loop = 1;
@@ -82,6 +80,12 @@ namespace VaultsII.Display {
                 for (int j = 0; j < contestants.Count; j++) {
                     Container container = contestants[j];
                     Uri path = new(container.FilePath, UriKind.RelativeOrAbsolute);
+                    Border border = new() {
+                        BorderBrush = Brushes.Transparent,
+                        BorderThickness = new(Configs.OutlineWidth),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
 
                     bool isVideo = container is VideoContainer;
                     object source = isVideo ? path : new BitmapImage(path);
@@ -93,7 +97,7 @@ namespace VaultsII.Display {
                             LoadedBehavior = MediaState.Pause
                         };
 
-                        panel.Children.Add(video);
+                        border.Child = video;
                     } else {
                         ImageSource imageSource = (ImageSource)source;
                         Image image = container is ImageContainer ?
@@ -105,8 +109,10 @@ namespace VaultsII.Display {
                             ImageBehavior.SetRepeatBehavior(image, RepeatBehavior.Forever);
                         }
 
-                        panel.Children.Add(image);
+                        border.Child = image;
                     }
+
+                    panel.Children.Add(border);
 
                     Rectangle spacer = new() { Height = newHeight, 
                         Width = Configs.SpacerWidth, 
@@ -150,14 +156,59 @@ namespace VaultsII.Display {
             }
             return tallest;
         }
+
+        public static List<MosaicSegment> CreateSerializableMosaic(this List<FrameworkElement> mosaic) {
+            string source;
+            List<MosaicSegment> segments = new();
+
+            int lineIndex = 0;
+            foreach (FrameworkElement element in mosaic) {
+                if (element is not StackPanel panel) { continue; }
+
+                double height = 0;
+                List<string> elements = new();
+                foreach (UIElement ui in panel.Children) {
+                    if (ui is not Border border) { continue; }
+                    if (border.Child is Image image) {
+                        source = image.Source?.GetType() != typeof(BitmapImage) ?
+                            ImageBehavior.GetAnimatedSource(image).ToString() :
+                            ((BitmapImage)image.Source).UriSource.ToString();
+
+                        if (height == 0) { height = image.Height; }
+                        elements.Add(source);
+                    } else if (border.Child is MediaElement video) {
+                        source = video.Source.ToString();
+
+                        if (height == 0) { height = video.Height; }
+                        elements.Add(source);
+                    }
+                }
+
+                if (elements.Count > 0) {
+                    segments.Add(new MosaicSegment(lineIndex, height, elements.ToArray(), Configs.Style, Configs.Direction));
+                }
+
+                lineIndex++;
+            }
+
+            return segments;
+        }
     }
     public static class Configs {
         public readonly static int PreferredItemsPerLine = 7;
-        public readonly static int SpacerWidth = 3;
+        public readonly static int SpacerWidth = 1;
+        public readonly static int OutlineWidth = 2;
 
         public static double  MaxHeight { get; private set; } = 1000;
         public static double MinHeight { get; private set; }  = 975;
         public static double TotalWidth { get; private set; }
+
+        public static Color OutlineColor {
+            get {
+                return (Color)ColorConverter.ConvertFromString("#586f99");
+            }
+        }
+
         public static SortingStyle Style { get; private set; } = SortingStyle.Chronological;
         public static SortingDirections Direction { get; private set; } = SortingDirections.Ascending;
 
@@ -173,6 +224,22 @@ namespace VaultsII.Display {
 
         public enum SortingDirections {
             Ascending, Descending, Custom
+        }
+    }
+
+    public class MosaicSegment {
+        public int index { get; private set; }
+        public double height { get; private set; }
+        public string[] elements { get; private set; }
+        public Configs.SortingStyle style { get; private set; }
+        public Configs.SortingDirections direction { get; private set; }
+
+        public MosaicSegment(int index, double height, string[] elements, Configs.SortingStyle style, Configs.SortingDirections direction) {
+            this.index = index;
+            this.height = height;
+            this.elements = elements;
+            this.style = style;
+            this.direction = direction;
         }
     }
 }

@@ -72,14 +72,11 @@
                 </StackPanel>
             </Grid>
 
-            <Rectangle Grid.Row="0"
-                   Height="1"
-                   VerticalAlignment="Bottom"
-                   Style="{StaticResource DividingLine}"/>
-
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+            <ScrollViewer Grid.Row="1"
+                          x:Name="Scroller"
+                          VerticalScrollBarVisibility="Hidden">
                 <ItemsControl x:Name="Body"
-                          Margin="5">
+                            Margin="5">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel Orientation="Vertical"/>

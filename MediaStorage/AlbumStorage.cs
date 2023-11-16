@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using CS = VaultsII.CachingSystem;
 
 namespace VaultsII.MediaStorage {
@@ -19,11 +18,15 @@ namespace VaultsII.MediaStorage {
         public event EventHandler OnCurrentAlbumChange;
 
         public static void SaveAlbumChanges(AlbumData albumData) {
-            CS.CachingSystem.SaveAlbumDataPackage(albumData.GetAlbumDataPackage());
+            CS.CachingSystem.SaveAlbumDataPackage(AlbumDataExtensions.GetAlbumDataPackage(albumData));
         }
 
         public void SetCurrentAlbum(string name) {
-            if (TryFindAlbum(name, out AlbumData album)) { Current = album; }
+            bool a = TryFindAlbum(name, out AlbumData _);
+            if (TryFindAlbum(name, out AlbumData album)) { 
+                Current = album;
+                Current.RemoveInvalidFiles(MonitoredFolders.Instance);
+            }
 
             OnCurrentAlbumChange?.Invoke(this, EventArgs.Empty);
         }
@@ -46,7 +49,7 @@ namespace VaultsII.MediaStorage {
             AlbumData newAlbum = new(name);
             Albums.Add(newAlbum);
 
-            CS.CachingSystem.SaveAlbumDataPackage(newAlbum.GetAlbumDataPackage());
+            CS.CachingSystem.SaveAlbumDataPackage(AlbumDataExtensions.GetAlbumDataPackage(newAlbum));
 
             OnAlbumsListChange?.Invoke(this, EventArgs.Empty);
         }
@@ -63,29 +66,13 @@ namespace VaultsII.MediaStorage {
             return TryFindAlbum(name, out _);
         }
 
-        public void UpdateAlbums() {
-            HashSet<string> uniquePaths = new();
-
-            if (!Albums.Contains(Everything)) { Albums.Add(Everything); }
-
-            foreach (AlbumData data in Albums) {
-                List<Container> uniqueContainers = new();
-
-                foreach (Container container in data.Media) {
-                    if (uniquePaths.Add(container.FilePath)) {
-                        uniqueContainers.Add(container);
-                    }
-                }
-
-                data.Media = uniqueContainers;
-                SaveAlbumChanges(data);
-            }
-
-            if (Albums.Contains(Everything)) { Albums.Remove(Everything); }
-        }
-
         private bool TryFindAlbum(string name, out AlbumData album) {
             album = null;
+
+            if (name == Everything.Name) {
+                album = Everything;
+                return true; 
+            }
 
             foreach (AlbumData data in Albums) {
                 if (data.Name != name) { continue; }
@@ -97,6 +84,8 @@ namespace VaultsII.MediaStorage {
         }
 
         public AlbumStorage() {
+            Instance = this;
+
             Albums = new();
             Everything = new(nameof(Everything));
 
@@ -113,7 +102,7 @@ namespace VaultsII.MediaStorage {
 
             Current = Everything;
 
-            Instance = this;
+            Current.RemoveInvalidFiles(MonitoredFolders.Instance);
         }
     }
 }

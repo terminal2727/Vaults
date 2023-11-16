@@ -1,13 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Text.Json;
-using System.Windows.Documents;
 using System.Collections.Generic;
 using VaultsII.MediaStorage;
-using System.IO.Packaging;
-using System.Net;
-using System.Text.Json.Serialization;
 
 namespace VaultsII.CachingSystem {
     public static class CachingSystem {

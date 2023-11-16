@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.Design;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VaultsII.Display;
 using VaultsII.MediaStorage;
-using VaultsII.Views.HomePanelViews;
 using WpfAnimatedGif;
 using static VaultsII.Display.MosaicConstructor;
 
@@ -21,7 +19,7 @@ namespace VaultsII.Views.Modals.AlbumModals
     public partial class AddPhotosModal : Window {
         private readonly AlbumStorage storage;
         private List<FrameworkElement> segments;
-        private List<Container> selected = new();
+        private readonly List<Container> selected = new();
 
         private const double MAX_HEIGHT = 500;
         private const double MIN_HEIGHT = 450;
@@ -35,7 +33,7 @@ namespace VaultsII.Views.Modals.AlbumModals
         }
 
         private async void CreateMosaic() {
-            SelectedPhotos.Text = $"Loading {storage.Current.Media.Count}";
+            SelectedPhotos.Text = $"Loading {storage.Everything.Media.Count}";
 
             if (!Body.IsLoaded) { await Body.GetLoadedAwaitable(); }
 
@@ -72,16 +70,17 @@ namespace VaultsII.Views.Modals.AlbumModals
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine("Completed");
+            storage.Everything.UpdateMosaic(segments.CreateSerializableMosaic());
+            AlbumStorage.SaveAlbumChanges(storage.Everything);
         }
 
         private void UpdateSelected(object sender, MouseButtonEventArgs e) {
-            string source = "";
+            string source;
 
             if (sender is Image image) {
-                source = image.Source.GetType() == typeof(WriteableBitmap) ? 
+                source = image.Source.GetType() != typeof(BitmapImage) ? 
                     ImageBehavior.GetAnimatedSource(image).ToString() : 
-                    ((BitmapImage)(image.Source)).UriSource.ToString();
+                    ((BitmapImage)image.Source).UriSource.ToString();
 
                 if (!storage.Everything.TryGetContainer(source, out Container container)) { return; }
 
@@ -132,7 +131,11 @@ namespace VaultsII.Views.Modals.AlbumModals
         }
 
         private void AddPhotos_Click(object sender, RoutedEventArgs e) {
+            foreach (Container container in selected) {
+                storage.Current.AddMedia(container.FilePath);
+            }
 
+            Close();
         }
 
         private void Close_Click(object sender, RoutedEventArgs e) {

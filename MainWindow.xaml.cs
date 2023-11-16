@@ -27,8 +27,6 @@ namespace VaultsII {
             storage.OnAlbumsListChange += (s, e) => PopulateAlbumViewsList();
             control.OnViewChanged += (s, e) => UpdateView();
 
-            storage.UpdateAlbums();
-
             PopulateAlbumViewsList();
         }
 
@@ -41,11 +39,7 @@ namespace VaultsII {
                 DataContext = control
             };
 
-            everythingButton.Checked += (s, e) => {
-                View.DataContext = control;
-                storage.SetCurrentToEverything();
-                control.SetAlbumView();
-            };
+            everythingButton.Checked += (s, e) => CheckButton(s, e);
 
             ViewButtonsColumn.Children.Add(everythingButton);
 
@@ -56,17 +50,21 @@ namespace VaultsII {
                     DataContext = control
                 };
 
-                button.Checked += (s, e) => {
-                    View.DataContext = control;
-
-                    storage.SetCurrentAlbum(
-                        ((RadioButton)s).Content.ToString() ?? "name" // Shouldn't ever be null, just to get that annoying warning to go away
-                    );
-
-                    control.SetAlbumView();
-                };
+                button.Checked += (s, e) => CheckButton(s, e);
 
                 ViewButtonsColumn.Children.Add(button);
+            }
+
+            void CheckButton(object sender, RoutedEventArgs e) {
+                View.DataContext = control;
+
+                string a = ((RadioButton)sender).Content.ToString() ?? "name";
+
+                storage.SetCurrentAlbum(
+                    ((RadioButton)sender).Content.ToString() ?? "name" // Shouldn't ever be null, just to get that annoying warning to go away
+                );
+
+                control.SetAlbumView();
             }
 
             control.UpdateUI();
