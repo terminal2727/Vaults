@@ -33,6 +33,7 @@ namespace VaultsII.Views.HomePanelViews {
         private int rectangleCount = 0;
 
         private List<FrameworkElement> segments;
+        private List<UIElement> visualElements;
 
         private TimeSpan lastPosition = TimeSpan.Zero;
         private static Color color { 
@@ -41,15 +42,12 @@ namespace VaultsII.Views.HomePanelViews {
             } 
         }
 
-        private LayoutDirection layoutDirection = LayoutDirection.Horizontal;
-
         private readonly AlbumStorage storage;
         private readonly List<Container> selected = new();
         private readonly ViewControl control;
 
         private const double MAX_HEIGHT = 1000;
         private const double MIN_HEIGHT = 950;
-        private const double SELECTED_PERCENTAGE = 0.97;
 
         public Album() {
             storage = AlbumStorage.Instance;
@@ -63,11 +61,6 @@ namespace VaultsII.Views.HomePanelViews {
             InitializeComponent();
 
             CreateMosaic();
-
-            RectangleOverlay.MouseDown += (s, e) => { 
-                Overlay.Visibility = Visibility.Hidden;
-                Overlay.Children.RemoveAt(2); // Should always be the image
-            };
         }
 
         private async void CreateMosaic() {
@@ -96,12 +89,9 @@ namespace VaultsII.Views.HomePanelViews {
 
         public async void PopulateMosaic() {
             segments = new();
+            visualElements = new();
 
-            if (layoutDirection == LayoutDirection.Horizontal) {
-                segments = await storage.Current.ConstructHorizontalMosaic();
-            } else {
-                
-            }
+            segments = await storage.Current.ConstructHorizontalMosaic(); 
 
             Body.ItemsSource = segments;
 
@@ -112,6 +102,8 @@ namespace VaultsII.Views.HomePanelViews {
 
                 foreach (var item in panel.Children) {
                     if (item is Border border) {
+                        visualElements.Add(border.Child);
+
                         border.MouseLeftButtonDown += (s, e) => LeftClick(s, e);
                         border.MouseEnter += (o, e) => PeekVideo(o, e, true); // Only applicable if video
                         border.MouseLeave += (o, e) => PeekVideo(o, e, false); // Only applicable if video
@@ -119,7 +111,7 @@ namespace VaultsII.Views.HomePanelViews {
                 }
             }
 
-            storage.Current.UpdateMosaic(segments.CreateSerializableMosaic());
+
             AlbumStorage.SaveAlbumChanges(storage.Current);
         }
 
@@ -133,7 +125,7 @@ namespace VaultsII.Views.HomePanelViews {
             video.LoadedBehavior = MediaState.Manual;
 
             if (!isEntering) {
-                video.Stop();
+                video.Pause();
                 return;
             }
 
@@ -155,42 +147,28 @@ namespace VaultsII.Views.HomePanelViews {
                 if (sender is not Border border) { return; }
 
                 if (border.Child is Image imageSource) {
-                    Image image = new() {
-                        Margin = new Thickness(53),
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
+                    int index = 0;
+                    foreach (UIElement element in visualElements) {
+                        if (element as Image == imageSource) {
+                            Overlay.Children.Add(new AlbumOverlay(index, visualElements));
+                            break;
+                        }
+                        index++;
+                    }
+                } else if (border.Child is MediaElement elementSource) {
+                    elementSource.LoadedBehavior = MediaState.Manual;
+                    elementSource.Pause();
 
-                    if (imageSource.Source is not BitmapImage _) {
-                        ImageSource source = ImageBehavior.GetAnimatedSource(imageSource);
-
-                        ImageBehavior.SetAnimatedSource(image, source);
-                        ImageBehavior.SetRepeatBehavior(image, RepeatBehavior.Forever);
-                    } else {
-                        image = new() {
-                            Source = imageSource.Source,
-                            Margin = image.Margin,
-                            HorizontalAlignment = image.HorizontalAlignment,
-                            VerticalAlignment = image.VerticalAlignment
-                        };
+                    int index = 0;
+                    foreach (UIElement element in visualElements) {
+                        if (element as MediaElement == elementSource) {
+                            Overlay.Children.Add(new AlbumOverlay(index, visualElements));
+                            break;
+                        }
+                        index++;
                     }
 
-                    Overlay.Children.Add(image);
-                } else if (border.Child is MediaElement elementSource) {
-                    MediaElement video = new() {
-                        Source = elementSource.Source,
-                        Margin = new Thickness(53),
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        LoadedBehavior = MediaState.Play
-                    };
-
-                    video.MouseLeftButtonDown += OverlayTogglePlay;
-                    video.Position = lastPosition;
-
-                    Overlay.Children.Add(video);
-
-                    isPlaying = true;
+                    isPlaying = false;
                 }
 
                 return;
@@ -235,7 +213,11 @@ namespace VaultsII.Views.HomePanelViews {
                     selected.Remove(container);
 
                     border.BorderBrush = Brushes.Transparent;
-                    border.BorderThickness = new Thickness(3);
+
+                    element.Width += Configs.OutlineWidth;
+                    element.Height += Configs.OutlineWidth;
+
+                    border.BorderThickness = new Thickness(0);
 
                     if (selected.Count == 0) {
                         ClearSelected();
@@ -249,7 +231,11 @@ namespace VaultsII.Views.HomePanelViews {
                     selected.Add(container);
 
                     border.BorderBrush = new SolidColorBrush(Configs.OutlineColor);
-                    border.BorderThickness = new Thickness(3);
+
+                    element.Width -= Configs.OutlineWidth;
+                    element.Height -= Configs.OutlineWidth;
+
+                    border.BorderThickness = new Thickness(Configs.OutlineWidth);
                 }
 
                 AlbumNameDisplay.Text = selected.Count.ToString();
@@ -280,22 +266,6 @@ namespace VaultsII.Views.HomePanelViews {
                 selected.Clear();
 
                 AlbumNameDisplay.Text = storage.Current.Name;
-            }
-        }
-
-        private void OverlayTogglePlay(object sender, MouseButtonEventArgs e) {
-            MediaElement video = (MediaElement)sender;
-
-            video.LoadedBehavior = MediaState.Manual;
-
-            if (!isPlaying) {
-                isPlaying = true;
-                video.Position = lastPosition;
-                video.Play();
-            } else {
-                isPlaying = false;
-                lastPosition = video.Position;
-                video.Stop();
             }
         }
 
@@ -335,8 +305,6 @@ namespace VaultsII.Views.HomePanelViews {
                 AlbumNameDisplay.Text = storage.Current.Name;
             }
         }
-
-        private void SwitchLayout(bool horizontal) => layoutDirection = horizontal ? LayoutDirection.Horizontal : LayoutDirection.Vertical;
 
         private void ClearAlbumContents() {
             Body.ItemsSource = new List<FrameworkElement>() { 

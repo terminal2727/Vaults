@@ -6,7 +6,57 @@
              xmlns:local="clr-namespace:VaultsII.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+    <Grid x:Name="Exterior">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="95*"/>
+            <RowDefinition Height="5*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0"
+              x:Name="VideoBody"/>
+
+        <Button Grid.Row="1"
+                x:Name="PlayButton"
+                Click="PlayButton_Click"
+                Width="20"
+                Height="20"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="5, 0, 0, 0">
+
+            <Image Source="..\Icons\PlayIcon.png" 
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
+
+        </Button>
+
+        <Slider Grid.Row="1"
+                x:Name="VideoTimeline"
+                Thumb.DragStarted="VideoTimeline_DragStarted"
+                Thumb.DragCompleted="VideoTimeline_DragCompleted"
+                Margin="30, 0, 30, 0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
+                Minimum="0"
+                Maximum="100"
+                SmallChange="0.1"
+                LargeChange="1"/>
+
+        <Button Grid.Row="1"
+                x:Name="MuteButton"
+                Click="MuteButton_Click"
+                Width="20"
+                Height="20"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0, 0, 5, 0">
+
+            <Image Source="..\Icons\AudioIcon.png" 
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
+
+        </Button>
     </Grid>
 </UserControl>

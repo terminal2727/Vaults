@@ -9,7 +9,6 @@ using WpfAnimatedGif;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 using System.Windows;
-using VaultsII.Controls;
 
 namespace VaultsII.Display {
     public static class MosaicConstructor {
@@ -114,7 +113,8 @@ namespace VaultsII.Display {
 
                     panel.Children.Add(border);
 
-                    Rectangle spacer = new() { Height = newHeight, 
+                    Rectangle spacer = new() { 
+                        Height = newHeight, 
                         Width = Configs.SpacerWidth, 
                         Fill = Brushes.Transparent
                     };
@@ -123,7 +123,8 @@ namespace VaultsII.Display {
                 }
 
                 segments.Add(panel);
-                segments.Add(new Rectangle() { Height = Configs.SpacerWidth, 
+                segments.Add(new Rectangle() { 
+                    Height = Configs.SpacerWidth, 
                     Width = Configs.TotalWidth, 
                     Fill = Brushes.Transparent 
                 });
@@ -156,48 +157,11 @@ namespace VaultsII.Display {
             }
             return tallest;
         }
-
-        public static List<MosaicSegment> CreateSerializableMosaic(this List<FrameworkElement> mosaic) {
-            string source;
-            List<MosaicSegment> segments = new();
-
-            int lineIndex = 0;
-            foreach (FrameworkElement element in mosaic) {
-                if (element is not StackPanel panel) { continue; }
-
-                double height = 0;
-                List<string> elements = new();
-                foreach (UIElement ui in panel.Children) {
-                    if (ui is not Border border) { continue; }
-                    if (border.Child is Image image) {
-                        source = image.Source?.GetType() != typeof(BitmapImage) ?
-                            ImageBehavior.GetAnimatedSource(image).ToString() :
-                            ((BitmapImage)image.Source).UriSource.ToString();
-
-                        if (height == 0) { height = image.Height; }
-                        elements.Add(source);
-                    } else if (border.Child is MediaElement video) {
-                        source = video.Source.ToString();
-
-                        if (height == 0) { height = video.Height; }
-                        elements.Add(source);
-                    }
-                }
-
-                if (elements.Count > 0) {
-                    segments.Add(new MosaicSegment(lineIndex, height, elements.ToArray(), Configs.Style, Configs.Direction));
-                }
-
-                lineIndex++;
-            }
-
-            return segments;
-        }
     }
     public static class Configs {
         public readonly static int PreferredItemsPerLine = 7;
         public readonly static int SpacerWidth = 1;
-        public readonly static int OutlineWidth = 2;
+        public readonly static int OutlineWidth = 3;
 
         public static double  MaxHeight { get; private set; } = 1000;
         public static double MinHeight { get; private set; }  = 975;
@@ -224,22 +188,6 @@ namespace VaultsII.Display {
 
         public enum SortingDirections {
             Ascending, Descending, Custom
-        }
-    }
-
-    public class MosaicSegment {
-        public int index { get; private set; }
-        public double height { get; private set; }
-        public string[] elements { get; private set; }
-        public Configs.SortingStyle style { get; private set; }
-        public Configs.SortingDirections direction { get; private set; }
-
-        public MosaicSegment(int index, double height, string[] elements, Configs.SortingStyle style, Configs.SortingDirections direction) {
-            this.index = index;
-            this.height = height;
-            this.elements = elements;
-            this.style = style;
-            this.direction = direction;
         }
     }
 }

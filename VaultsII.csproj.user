@@ -7,6 +7,9 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Controls\AlbumOverlay.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Controls\VideoPlayer.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -33,6 +36,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Controls\AlbumOverlay.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Controls\VideoPlayer.xaml">
       <SubType>Designer</SubType>
     </Page>

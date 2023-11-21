@@ -79,7 +79,7 @@
                         Width="50"
                         Style="{StaticResource BackgroundButtons}">
 
-                        <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\BackIcon.png" 
+                        <Image Source="Icons\BackIcon.png" 
                             RenderOptions.BitmapScalingMode="HighQuality"/>
                     
                 </Button>
@@ -93,7 +93,7 @@
                         Width="50"
                         Style="{StaticResource BackgroundButtons}">
 
-                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\AddFolderIcon.png" 
+                    <Image Source="Icons\AddFolderIcon.png" 
                             RenderOptions.BitmapScalingMode="HighQuality"/>
 
                 </Button>
@@ -107,7 +107,7 @@
                         Width="50"
                         Style="{StaticResource BackgroundButtons}">
 
-                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\RemoveFolderIcon.png" 
+                    <Image Source="Icons\RemoveFolderIcon.png" 
                             RenderOptions.BitmapScalingMode="HighQuality"/>
 
                 </Button>
@@ -121,7 +121,7 @@
                         Width="50"
                         Style="{StaticResource BackgroundButtons}">
 
-                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\SortIcon.png" 
+                    <Image Source="Icons\SortIcon.png" 
                             RenderOptions.BitmapScalingMode="HighQuality"/>
 
                 </Button>
@@ -142,7 +142,7 @@
                         Width="50"
                         Style="{StaticResource BackgroundButtons}">
 
-                    <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\HomeIcon.png"
+                    <Image Source="Icons\HomeIcon.png"
                            RenderOptions.BitmapScalingMode="HighQuality"/>
 
                 </Button>

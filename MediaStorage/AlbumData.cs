@@ -15,10 +15,6 @@ namespace VaultsII.MediaStorage {
     public class AlbumData {
         public string Name { get; set; }
 
-        public List<MosaicSegment> ChronologicalMosaic { get; private set; }
-        public List<MosaicSegment> CustomMosaic { get; private set; }
-        public List<MosaicSegment> DateMosaic { get; private set; }
-        public List<MosaicSegment> NameMosaic { get; private set; }
         public List<Container> Media { get; private set; }
 
         public DateTime Created { get; set; }
@@ -63,25 +59,6 @@ namespace VaultsII.MediaStorage {
         }
 
         public void SortMedia() => Media = Media.OrderByDescending(item => item.Created).ToList();
-
-        public void UpdateMosaic(List<MosaicSegment> items) {
-            // Add to AlbumDataPackage
-            Configs.SortingStyle style = items[0].style;
-            switch (style) {
-                case Configs.SortingStyle.Custom:
-                    CustomMosaic = items;
-                    break;
-                case Configs.SortingStyle.Date:
-                    DateMosaic = items;
-                    break;
-                case Configs.SortingStyle.Name:
-                    NameMosaic = items;
-                    break;
-                case Configs.SortingStyle.Chronological:
-                    ChronologicalMosaic = items;
-                    break;
-            }
-        }
 
         private bool ContainsPath(string path) {
             foreach (Container container in Media) {

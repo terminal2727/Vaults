@@ -56,7 +56,7 @@
                         Width="62"
                         Margin="3"
                         Style="{StaticResource ForegroundButtons}">
-                        <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\AddIcon.png"
+                        <Image Source="..\..\Icons\AddIcon.png"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Button>
 
@@ -65,7 +65,7 @@
                         Width="62"
                         Margin="3"
                         Style="{StaticResource ForegroundButtons}">
-                        <Image Source="C:\Users\commi\source\repos\VaultsII\VaultsII\Icons\SettingsIcon.png"
+                        <Image Source="..\..\Icons\SettingsIcon.png"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Button>
 

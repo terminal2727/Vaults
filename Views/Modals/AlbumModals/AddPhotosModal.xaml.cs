@@ -69,9 +69,6 @@ namespace VaultsII.Views.Modals.AlbumModals
                     }
                 }
             }
-
-            storage.Everything.UpdateMosaic(segments.CreateSerializableMosaic());
-            AlbumStorage.SaveAlbumChanges(storage.Everything);
         }
 
         private void UpdateSelected(object sender, MouseButtonEventArgs e) {

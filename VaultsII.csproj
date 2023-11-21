@@ -10,7 +10,65 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Icons\" />
+    <None Remove="Icons\AddFolderIcon.png" />
+    <None Remove="Icons\AddIcon.png" />
+    <None Remove="Icons\AudioIcon.png" />
+    <None Remove="Icons\BackIcon.png" />
+    <None Remove="Icons\DivideOverlayIcon.png" />
+    <None Remove="Icons\HomeIcon.png" />
+    <None Remove="Icons\LeftIcon.png" />
+    <None Remove="Icons\MuteIcon.png" />
+    <None Remove="Icons\PauseIcon.png" />
+    <None Remove="Icons\PlayIcon.png" />
+    <None Remove="Icons\RemoveFolderIcon.png" />
+    <None Remove="Icons\RightIcon.png" />
+    <None Remove="Icons\SettingsIcon.png" />
+    <None Remove="Icons\SortIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Icons\AddFolderIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\AddIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\AudioIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\BackIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\DivideOverlayIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\HomeIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\LeftIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\MuteIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\PauseIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\PlayIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\RemoveFolderIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\RightIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\SettingsIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Icons\SortIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
