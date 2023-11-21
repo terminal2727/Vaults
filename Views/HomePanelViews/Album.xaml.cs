@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using VaultsII.Controls;
 using VaultsII.Core;
 using VaultsII.Display;
@@ -34,6 +34,7 @@ namespace VaultsII.Views.HomePanelViews {
 
         private List<FrameworkElement> segments;
         private List<UIElement> visualElements;
+        private Dictionary<AlbumOverlay, Grid> overlayGridPairs = new();
 
         private TimeSpan lastPosition = TimeSpan.Zero;
         private static Color color { 
@@ -129,7 +130,7 @@ namespace VaultsII.Views.HomePanelViews {
                 return;
             }
 
-            await Task.Delay(500);
+            await Task.Delay(250);
 
             if (!video.IsMouseOver) { return; }
 
@@ -137,40 +138,162 @@ namespace VaultsII.Views.HomePanelViews {
             video.Play();
         }
 
+        private void CreateMediaOverlay(UIElement startMedia) {
+            if (OverlayBody.ColumnDefinitions.Count == 0) { OverlayBody.ColumnDefinitions.Add(new()); }
+
+            AlbumOverlay albumOverlay = CreateAlbumOverlay(startMedia);
+
+            albumOverlay.OnHorizontalDivide += (s, _) => AddAdditionalColumnAlbumOverlay(s);
+            albumOverlay.OnVerticalDivide += (s, _) => AddAdditionRowAlbumOverlay(s);
+            albumOverlay.OnRemove += (s, _) => RemoveAlbumOverlay(s);
+
+            OverlayBody.Children.Add(albumOverlay);
+
+            Grid.SetColumn(albumOverlay, 0);
+
+            Overlay.Visibility = Visibility.Visible;
+
+            AlbumOverlay CreateAlbumOverlay(UIElement startMedia, int offset = 0) {
+                AlbumOverlay albumOverlay = default;
+
+                if (startMedia is Image imageSource) {
+                    int index = 0;
+                    foreach (UIElement element in visualElements) {
+                        if (element as Image == imageSource) {
+                            albumOverlay = new AlbumOverlay(
+                                index + offset >= visualElements.Count ? 0 : index + offset, visualElements
+                            ) {  ColumnIndex = 0 };
+                            break;
+                        }
+                        index++;
+                    }
+                } else if (startMedia is MediaElement elementSource) {
+                    elementSource.LoadedBehavior = MediaState.Manual;
+                    elementSource.Pause();
+                    isPlaying = false;
+
+                    int index = 0;
+                    foreach (UIElement element in visualElements) {
+                        if (element as MediaElement == elementSource) {
+                            albumOverlay = new AlbumOverlay(
+                                index + offset >= visualElements.Count ? 0 : index + offset, visualElements
+                            ) { ColumnIndex = 0 };
+                            break;
+                        }
+                        index++;
+                    }
+                }
+
+                return albumOverlay;
+            }
+            
+            void AddAdditionalColumnAlbumOverlay(object s) {
+                AlbumOverlay callingOverlay = (AlbumOverlay)s;
+
+                OverlayBody.ColumnDefinitions.Add(new() { Width = new GridLength(3) });
+
+                GridSplitter splitter = new() {
+                    Width = 3,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Background = new SolidColorBrush(color),
+                    BorderThickness = new Thickness(0)
+                };
+
+                OverlayBody.Children.Add(splitter);
+                Grid.SetColumn(splitter, OverlayBody.ColumnDefinitions.Count - 1);
+                
+                OverlayBody.ColumnDefinitions.Add(new());
+
+                AlbumOverlay overlay = CreateAlbumOverlay(callingOverlay.InteriorElement, 1);
+                overlay.ColumnIndex = callingOverlay.ColumnIndex + 2;
+                OverlayBody.Children.Add(overlay);
+
+                Grid.SetColumn(overlay, OverlayBody.ColumnDefinitions.Count - 1);
+
+                overlay.OnHorizontalDivide += (s, _) => AddAdditionalColumnAlbumOverlay(s);
+                overlay.OnVerticalDivide += (s, _) => AddAdditionRowAlbumOverlay(s);
+                overlay.OnRemove += (s, _) => RemoveAlbumOverlay(s);
+            }
+
+            void AddAdditionRowAlbumOverlay(object s) {
+                AlbumOverlay callingOverlay = (AlbumOverlay)s;
+
+                Grid verticalSplit;
+                if (overlayGridPairs.TryGetValue(callingOverlay, out Grid grid)) {
+                    verticalSplit = grid;
+                } else {
+                    verticalSplit = new();
+
+                    OverlayBody.Children.Add(verticalSplit);
+
+                    Grid.SetColumn(verticalSplit, callingOverlay.ColumnIndex);
+
+                    verticalSplit.RowDefinitions.Add(new());
+
+                    OverlayBody.Children.Remove(callingOverlay);
+                    verticalSplit.Children.Add(callingOverlay);
+
+                    Grid.SetRow(callingOverlay, 0);
+
+                    overlayGridPairs.Add(callingOverlay, verticalSplit);
+                }
+
+                verticalSplit.RowDefinitions.Add(new() { Height = new GridLength(3) });
+
+                GridSplitter splitter = new() {
+                    Height = 3,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Background = new SolidColorBrush(color),
+                    BorderThickness = new Thickness(0)
+                };
+
+                verticalSplit.Children.Add(splitter);
+                Grid.SetRow(splitter, verticalSplit.RowDefinitions.Count - 1);
+
+                verticalSplit.RowDefinitions.Add(new());
+
+                AlbumOverlay overlay = CreateAlbumOverlay(callingOverlay.InteriorElement, 1);
+                verticalSplit.Children.Add(overlay);
+
+                Grid.SetRow(overlay, verticalSplit.RowDefinitions.Count - 1);
+                overlayGridPairs.Add(overlay, verticalSplit);
+
+                // create new grid
+                // add grid to overlay
+                // set grid to appropriate column
+                // add rows
+                // assign calling overlay to proper row
+                // add new overlay to proper row
+
+                overlay.OnHorizontalDivide += (s, _) => AddAdditionalColumnAlbumOverlay(s);
+                overlay.OnVerticalDivide += (s, _) => AddAdditionRowAlbumOverlay(s);
+                overlay.OnRemove += (s, _) => RemoveAlbumOverlay(s);
+            }
+        
+            void RemoveAlbumOverlay(object s) {
+                AlbumOverlay overlay = (AlbumOverlay)s;
+                if (overlayGridPairs.TryGetValue(overlay, out Grid grid)) {
+                    overlayGridPairs.Remove(overlay);
+                    grid.Children.Remove(overlay);
+                } else {
+                    OverlayBody.Children.Remove(overlay);
+                }
+
+                overlay.OnHorizontalDivide -= (s, _) => AddAdditionalColumnAlbumOverlay(s);
+                overlay.OnVerticalDivide -= (s, _) => AddAdditionRowAlbumOverlay(s);
+                overlay.OnRemove -= (s, _) => RemoveAlbumOverlay(s);
+            }
+        }
+        
         private void LeftClick(object sender, MouseButtonEventArgs e) {
             // May have to change to a grid splitter. Standby
             if (e.ClickCount == 2) {
                 ClearSelected();
 
-                Overlay.Visibility = Visibility.Visible;
-
                 if (sender is not Border border) { return; }
 
-                if (border.Child is Image imageSource) {
-                    int index = 0;
-                    foreach (UIElement element in visualElements) {
-                        if (element as Image == imageSource) {
-                            Overlay.Children.Add(new AlbumOverlay(index, visualElements));
-                            break;
-                        }
-                        index++;
-                    }
-                } else if (border.Child is MediaElement elementSource) {
-                    elementSource.LoadedBehavior = MediaState.Manual;
-                    elementSource.Pause();
-
-                    int index = 0;
-                    foreach (UIElement element in visualElements) {
-                        if (element as MediaElement == elementSource) {
-                            Overlay.Children.Add(new AlbumOverlay(index, visualElements));
-                            break;
-                        }
-                        index++;
-                    }
-
-                    isPlaying = false;
-                }
-
+                CreateMediaOverlay(border.Child);
+                
                 return;
             }
 
@@ -271,7 +394,13 @@ namespace VaultsII.Views.HomePanelViews {
 
         private void OverlayBack_Click(object sender, RoutedEventArgs e) {
             Overlay.Visibility = Visibility.Hidden;
-            Overlay.Children.RemoveAt(2); // Should always be the media container
+            
+            foreach (var element in ParentGrid.Children) {
+                if (element is not Grid grid) { continue; }
+                grid.Children.Clear();
+                grid.ColumnDefinitions.Clear();
+                grid.RowDefinitions.Clear();
+            }
 
             lastPosition = TimeSpan.Zero;
         }
@@ -315,10 +444,6 @@ namespace VaultsII.Views.HomePanelViews {
                 } 
             };
         }
-    }
-
-    public enum LayoutDirection {
-        Horizontal = 0, Vertical = 1
     }
 
     public static class AlbumExtensions {

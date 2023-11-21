@@ -8,19 +8,35 @@
              d:DesignHeight="450" d:DesignWidth="800">
     
     <Grid x:Name="Exterior">
-        <Button x:Name="DivideButton"
-                Click="DivideButton_Click"
-                Width="40"
+        <Button x:Name="HorizontalDivide"
+                Content="Horizontal"
+                Click="HorizontalDivide_Click"
+                Width="90"
                 Height="30"
-                Background="Transparent"
-                BorderBrush="Transparent"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Margin="5">
+                Margin="5"
+                Style="{StaticResource ForegroundButtons}"/>
 
-            <Image Source="..\Icons\DivideOverlayIcon.png" 
-                   RenderOptions.BitmapScalingMode="HighQuality"/>
-        </Button>
+        <Button x:Name="VerticalDivide"
+                Content="Vertical"
+                Click="VerticalDivide_Click"
+                Width="90"
+                Height="30"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="5, 5, 100, 5"
+                Style="{StaticResource ForegroundButtons}"/>
+        
+        <Button x:Name="RemoveSegment"
+                Content="Remove"
+                Click="RemoveSegment_Click"
+                Width="90"
+                Height="30"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="5, 5, 195, 5"
+                Style="{StaticResource ForegroundButtons}"/>
 
         <Button x:Name="LeftArrow"
                 Click="LeftArrow_Click"

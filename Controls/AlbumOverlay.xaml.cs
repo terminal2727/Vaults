@@ -15,10 +15,13 @@ namespace VaultsII.Controls {
     /// Interaction logic for AlbumOverlay.xaml
     /// </summary>
     public partial class AlbumOverlay : UserControl {
+        public int ColumnIndex { get; set; }
         public UIElement InteriorElement { get; private set; }
         public List<UIElement> Elements { get; private set; }
 
-        public event RoutedEventHandler OnDivide;
+        public event RoutedEventHandler OnHorizontalDivide;
+        public event RoutedEventHandler OnVerticalDivide;
+        public event RoutedEventHandler OnRemove;
 
         private int index = 0;
 
@@ -26,6 +29,7 @@ namespace VaultsII.Controls {
             InitializeComponent();
 
             index = startingIndex;
+
             Elements = elements;
             InteriorElement = elements[index];
 
@@ -74,8 +78,16 @@ namespace VaultsII.Controls {
             }
         }
 
-        private void DivideButton_Click(object sender, RoutedEventArgs e) {
-            OnDivide?.Invoke(this, e);
+        private void HorizontalDivide_Click(object sender, RoutedEventArgs e) {
+            OnHorizontalDivide?.Invoke(this, e);
+        }
+
+        private void VerticalDivide_Click(object sender, RoutedEventArgs e) {
+            OnVerticalDivide?.Invoke(this, e);
+        }
+
+        private void RemoveSegment_Click(object sender, RoutedEventArgs e) {
+            OnRemove?.Invoke(this, e);
         }
     }
 

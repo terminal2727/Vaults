@@ -21,8 +21,8 @@ namespace VaultsII.Views.Modals.AlbumModals
         private List<FrameworkElement> segments;
         private readonly List<Container> selected = new();
 
-        private const double MAX_HEIGHT = 500;
-        private const double MIN_HEIGHT = 450;
+        private const double MAX_HEIGHT = 475;
+        private const double MIN_HEIGHT = 425;
 
         public AddPhotosModal() {
             storage = AlbumStorage.Instance;
@@ -53,74 +53,133 @@ namespace VaultsII.Views.Modals.AlbumModals
 
             Body.ItemsSource = segments;
 
-            foreach (FrameworkElement element in segments) {
-                if (element is not StackPanel panel) { continue; }
+            foreach (FrameworkElement segment in segments) {
+                if (segment is not StackPanel panel) { continue; }
 
                 panel.Background = Brushes.Transparent;
 
                 foreach (var item in panel.Children) {
-                    if (item is Image image) {
-                        image.MouseLeftButtonDown += (o, e) => UpdateSelected(o, e);
-                    } else if (item is MediaElement video) {
-                        video.MouseLeftButtonDown += (o, e) => UpdateSelected(o, e);
-
-                        video.MouseEnter += (o, e) => PeekVideo(o, e, true);
-                        video.MouseLeave += (o, e) => PeekVideo(o, e, false);
+                    if (item is Border border) {
+                        border.MouseLeftButtonDown += (s, e) => UpdateSelected(s, e);
+                        border.MouseEnter += (o, e) => PeekVideo(o, e, true); // Only applicable if video
+                        border.MouseLeave += (o, e) => PeekVideo(o, e, false); // Only applicable if video
                     }
                 }
             }
         }
 
         private void UpdateSelected(object sender, MouseButtonEventArgs e) {
-            string source;
-
-            if (sender is Image image) {
-                source = image.Source.GetType() != typeof(BitmapImage) ? 
-                    ImageBehavior.GetAnimatedSource(image).ToString() : 
-                    ((BitmapImage)image.Source).UriSource.ToString();
-
-                if (!storage.Everything.TryGetContainer(source, out Container container)) { return; }
-
-                image.RenderTransformOrigin = new Point(0.5, 0.5);
-
-                if (selected.Contains(container)) {
-                    selected.Remove(container);
-                    image.RenderTransform = new ScaleTransform() { ScaleX = 1, ScaleY = 1 };
-                } else {
-                    selected.Add(container);
-                    image.RenderTransform = new ScaleTransform() { ScaleX = 0.95, ScaleY = 0.95 };
-                }
-            } else if (sender is MediaElement video) {
-                source = video.Source.ToString();
-
-                if (!storage.Everything.TryGetContainer(source, out Container container)) { return; }
-
-                video.RenderTransformOrigin = new Point(0.5, 0.5);
-
-                if (selected.Contains(container)) {
-                    selected.Remove(container);
-                    video.RenderTransform = new ScaleTransform() { ScaleX = 1, ScaleY = 1 };
-                } else {
-                    selected.Add(container);
-                    video.RenderTransform = new ScaleTransform() { ScaleX = 0.95, ScaleY = 0.95 };
-                }
-            }
-
-            SelectedPhotos.Text = $"Photos Selected: {selected.Count}";
-        }
-
-        private static async void PeekVideo(object o, MouseEventArgs e, bool isEntering) {
-            MediaElement video = (MediaElement)o;
-            video.LoadedBehavior = MediaState.Manual;
-
-            if (!isEntering) {
-                video.Stop();
+            if (Keyboard.IsKeyDown(Key.Escape)) {
+                ClearSelected();
                 return;
             }
 
-            await Task.Delay(500);
+            if (e.ClickCount == 1) {
+                bool isVideo;
+                string source;
 
+                Container container;
+
+                if (sender is not Border border) { return; } // Shouldn't really be necessary, but just in case.
+
+                // Get the element's source/information
+                if (border.Child is Image image) {
+                    source = image.Source.GetType() != typeof(BitmapImage) ?
+                        ImageBehavior.GetAnimatedSource(image).ToString() :
+                        ((BitmapImage)image.Source).UriSource.ToString();
+
+                    if (!storage.Everything.TryGetContainer(source, out container)) { return; }
+
+                    isVideo = false;
+                } else if (border.Child is MediaElement video) {
+                    source = video.Source.ToString();
+
+                    if (!storage.Everything.TryGetContainer(source, out container)) { return; }
+
+                    isVideo = true;
+                } else {
+                    return;
+                }
+
+                if (selected.Contains(container)) {
+                    // Remove element from selected & destroy outline
+                    FrameworkElement element = isVideo ? (MediaElement)border.Child : (Image)border.Child;
+
+                    selected.Remove(container);
+
+                    border.BorderBrush = Brushes.Transparent;
+
+                    element.Width += Configs.OutlineWidth;
+                    element.Height += Configs.OutlineWidth;
+
+                    border.BorderThickness = new Thickness(0);
+
+                    if (selected.Count == 0) {
+                        ClearSelected();
+                        SelectedPhotos.Text = $"Photos Selected: {selected.Count}";
+                        return;
+                    }
+                } else {
+                    // Add element to selected & create outline
+                    FrameworkElement element = isVideo ? (MediaElement)border.Child : (Image)border.Child;
+
+                    selected.Add(container);
+
+                    border.BorderBrush = new SolidColorBrush(Configs.OutlineColor);
+
+                    element.Width -= Configs.OutlineWidth;
+                    element.Height -= Configs.OutlineWidth;
+
+                    border.BorderThickness = new Thickness(Configs.OutlineWidth);
+                }
+
+                SelectedPhotos.Text = $"Photos Selected: {selected.Count}";
+
+                return;
+            }
+
+            SelectedPhotos.Text = $"Photos Selected: {selected.Count}";
+
+            void ClearSelected() {
+                foreach (Container container in selected) {
+                    foreach (FrameworkElement element in segments) {
+                        if (element is not StackPanel panel) { continue; }
+
+                        foreach (var item in panel.Children) {
+                            if (item is not Border border) { continue; }
+
+                            border.BorderBrush = Brushes.Transparent;
+                            border.BorderThickness = new Thickness(4);
+
+                            if (border.Child is Image image) {
+                                image.RenderTransform = new ScaleTransform() { ScaleX = 1, ScaleY = 1 };
+                            } else if (border.Child is MediaElement video) {
+                                video.RenderTransform = new ScaleTransform() { ScaleX = 1, ScaleY = 1 };
+                            }
+                        }
+                    }
+                }
+
+                selected.Clear();
+            }
+        }
+
+        private static async void PeekVideo(object o, MouseEventArgs e, bool isEntering) {
             if (e.LeftButton == MouseButtonState.Pressed) { return; }
+
+            Border border = (Border)o;
+
+            if (border.Child is not MediaElement video) { return; }
+
+            video.LoadedBehavior = MediaState.Manual;
+
+            if (!isEntering) {
+                video.Pause();
+                return;
+            }
+
+            await Task.Delay(250);
+
             if (!video.IsMouseOver) { return; }
 
             video.Volume = 0;

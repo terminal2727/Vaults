@@ -10,20 +10,31 @@
         <Grid x:Name="Overlay" 
               Visibility="Hidden"
               Panel.ZIndex="1">
-            
+
             <Rectangle x:Name="RectangleOverlay"
-                       Fill="Black"
-                       Opacity="0.5"/>
-            
-            <Button x:Name="OverlayBack"
-                    Content="&lt;-"
-                    Click="OverlayBack_Click"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Width="62"
-                    Height="40"
-                    Margin="5"
-                    Style="{StaticResource ForegroundButtons}"/>
+                           Fill="Black"
+                           Opacity="0.8"/>
+
+            <Grid x:Name="ParentGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Column="0"
+                        x:Name="OverlayBack"
+                        Content="&lt;-"
+                        Click="OverlayBack_Click"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Width="62"
+                        Height="40"
+                        Margin="5"
+                        Style="{StaticResource ForegroundButtons}"/>
+
+                <Grid Grid.Row="1"
+                      x:Name="OverlayBody"/>
+            </Grid>
         </Grid>
         
         
